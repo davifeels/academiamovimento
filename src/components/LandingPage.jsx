@@ -203,28 +203,30 @@ export default function LandingPage({ onOpenDashboard }) {
   return (
     <div className="min-h-screen bg-[#070d18] text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-black">
       
-      {/* 100% Full-Bleed Top Bar */}
-      <div className="w-full bg-gradient-to-r from-[#07152b] via-[#09221d] to-[#0a1829] border-b border-white/10 py-2.5 px-4 sm:px-8 text-xs">
-        <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-2">
-          <div className="flex items-center gap-2.5 text-slate-300">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-extrabold text-[11px] border border-emerald-500/30">
+      {/* 100% Full-Bleed Sleek Top Ribbon */}
+      <div className="w-full bg-[#050a14] border-b border-white/[0.08] py-2 px-4 sm:px-8 text-xs font-mono">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 text-[11px]">
+          <div className="flex items-center gap-2 truncate">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-extrabold text-[10px] border border-emerald-500/30 whitespace-nowrap">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
               PROPOSTA EXCLUSIVA
             </span>
-            <span className="hidden sm:inline font-medium">Solução de Inteligência Comercial para a <strong>Academia Movimento</strong> • Planaltina-DF</span>
+            <span className="text-slate-400 truncate hidden sm:inline">
+              Solução de Inteligência Comercial para a <strong className="text-white">Academia Movimento</strong> • Planaltina-DF
+            </span>
           </div>
 
-          <div className="flex items-center gap-4 text-slate-400 text-[11px] font-mono">
-            <span className="flex items-center gap-1 text-slate-300 font-semibold">
+          <div className="flex items-center gap-3 sm:gap-5 text-slate-400 whitespace-nowrap text-[11px] flex-shrink-0">
+            <span className="hidden md:inline-flex items-center gap-1.5 text-slate-300 font-semibold">
               <Building2 className="w-3.5 h-3.5 text-blue-400" /> +30 anos em Planaltina
             </span>
-            <span className="hidden md:inline text-slate-600">•</span>
+            <span className="hidden md:inline text-slate-700">•</span>
             <span className="text-emerald-400 font-bold flex items-center gap-1">
               <Star className="w-3.5 h-3.5 fill-emerald-400 text-emerald-400" /> 12,8 mil seguidores @ac.movimentopl
             </span>
             <button
               onClick={onOpenDashboard}
-              className="text-white hover:text-emerald-400 font-extrabold underline flex items-center gap-1 cursor-pointer ml-2"
+              className="text-white hover:text-emerald-400 font-extrabold underline flex items-center gap-1 cursor-pointer ml-1 text-[11px]"
             >
               Acessar Painel <ChevronRight className="w-3 h-3" />
             </button>
@@ -232,39 +234,63 @@ export default function LandingPage({ onOpenDashboard }) {
         </div>
       </div>
 
-      {/* 100% Full-Bleed Modern Sticky Navbar (NO BLACK SIDE BARS) */}
-      <header className="sticky top-0 z-50 w-full bg-[#070d18]/90 backdrop-blur-xl border-b border-white/10 transition-all duration-300 shadow-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <BrandLogo size="md" />
+      {/* 100% Full-Bleed Modern Sticky Navbar with Generous Breathing Room */}
+      <header className="sticky top-0 z-50 w-full bg-[#070d18]/95 backdrop-blur-xl border-b border-white/[0.08] transition-all duration-300 shadow-2xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 sm:h-22 flex items-center justify-between gap-4 lg:gap-6">
+          <BrandLogo size="md" className="flex-shrink-0" />
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-8 text-xs font-bold text-slate-300 tracking-wider uppercase font-mono">
-            <a href="#oportunidades" className="hover:text-emerald-400 transition-colors">Oportunidades</a>
-            <a href="#como-funciona" className="hover:text-emerald-400 transition-colors">Como Funciona</a>
-            <a href="#calculadora" className="hover:text-emerald-400 transition-colors text-emerald-400 flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20">
-              <Calculator className="w-3.5 h-3.5" /> Calculadora ROI
+          {/* Desktop Navigation Links (with whitespace-nowrap to guarantee NO ugly 2-line wraps) */}
+          <nav className="hidden lg:flex items-center gap-4 xl:gap-7 text-xs xl:text-sm font-bold text-slate-300 tracking-wider uppercase font-mono">
+            <a href="#oportunidades" className="whitespace-nowrap hover:text-emerald-400 transition-colors py-1">
+              Oportunidades
             </a>
-            <a href="#recursos" className="hover:text-emerald-400 transition-colors">Recursos</a>
-            <a href="#planos" className="hover:text-emerald-400 transition-colors">Planos da Unidade</a>
-            <a href="#estrutura" className="hover:text-emerald-400 transition-colors">Estrutura</a>
+            <a href="#como-funciona" className="whitespace-nowrap hover:text-emerald-400 transition-colors py-1">
+              Como Funciona
+            </a>
+            <a href="#recursos" className="whitespace-nowrap hover:text-emerald-400 transition-colors py-1">
+              Recursos
+            </a>
+            <a
+              href="#calculadora"
+              className="whitespace-nowrap hover:text-emerald-300 transition-all text-emerald-400 flex items-center gap-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-xl border border-emerald-500/25 shadow-sm"
+            >
+              <Calculator className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>Calculadora ROI</span>
+            </a>
+            <a href="#planos" className="whitespace-nowrap hover:text-emerald-400 transition-colors py-1">
+              Planos
+            </a>
+            <a href="#estrutura" className="whitespace-nowrap hover:text-emerald-400 transition-colors py-1">
+              Estrutura
+            </a>
           </nav>
 
-          {/* Action Button */}
-          <div className="flex items-center gap-3">
+          {/* Action Button Desktop & Mobile */}
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             <button
               onClick={onOpenDashboard}
               aria-label="Abrir demonstração do dashboard interativo"
-              className="relative inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-extrabold text-xs tracking-wider uppercase btn-emerald cursor-pointer shadow-lg"
+              className="hidden sm:inline-flex whitespace-nowrap flex-shrink-0 items-center gap-2 px-5 py-2.5 rounded-xl font-extrabold text-xs tracking-wider uppercase btn-emerald cursor-pointer shadow-lg shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
             >
-              <Activity className="w-4 h-4 text-slate-950" />
-              <span>Explorar Demonstração</span>
+              <Activity className="w-4 h-4 text-slate-950 flex-shrink-0" />
+              <span className="whitespace-nowrap">Explorar Demonstração</span>
+            </button>
+
+            {/* Mobile-only CTA */}
+            <button
+              onClick={onOpenDashboard}
+              aria-label="Acessar painel demonstrativo"
+              className="sm:hidden whitespace-nowrap inline-flex items-center gap-1.5 px-3 py-2 rounded-xl font-extrabold text-xs uppercase tracking-wider btn-emerald cursor-pointer shadow-md"
+            >
+              <Activity className="w-3.5 h-3.5 text-slate-950" />
+              <span>Demo</span>
             </button>
           </div>
         </div>
       </header>
 
-      {/* 100% FULL-BLEED HERO SECTION — CINEMATIC ATHLETIC BACKGROUND (NO BLACK VOID) */}
-      <section className="relative w-full min-h-[85vh] lg:min-h-[88vh] flex items-center overflow-hidden py-12 lg:py-16">
+      {/* 100% FULL-BLEED HERO SECTION — ~90% VIEWPORT COVERAGE WITH LUXURIOUS TOP BREATHING ROOM */}
+      <section className="relative w-full min-h-[88vh] lg:min-h-[92vh] flex items-center overflow-hidden pt-12 sm:pt-16 lg:pt-20 pb-16 sm:pb-20 lg:pb-24">
         
         {/* Full-Bleed High-Resolution Fitness Imagery covering 100% of the screen */}
         <div className="absolute inset-0 w-full h-full">
@@ -281,26 +307,27 @@ export default function LandingPage({ onOpenDashboard }) {
           <div className="absolute bottom-1/4 left-1/4 w-[600px] h-[600px] bg-blue-600/10 blur-[150px] pointer-events-none rounded-full"></div>
         </div>
 
-        {/* Content Container (Standard 7xl, Perfectly Centered) */}
+        {/* Content Container (Standard 7xl, Perfectly Centered with generous vertical breathing room) */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
             
             {/* Left Column (7 cols): Typography, Hierarchy & Value Proposition */}
             <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
               
               {/* Pill badge */}
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/80 border border-emerald-500/30 text-xs font-bold text-emerald-400 backdrop-blur-md shadow-lg">
-                <Flame className="w-3.5 h-3.5 text-emerald-400" />
-                <span>GESTÃO COMERCIAL INTELIGENTE • PLANALTINA-DF</span>
+                <Flame className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                <span className="tracking-wide">GESTÃO COMERCIAL INTELIGENTE • PLANALTINA-DF</span>
               </div>
 
-              {/* Title with clean, strong athletic typography */}
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.1]">
-                Mais interessados <br className="hidden sm:block" />
+              {/* Title with clean, strong athletic typography and balanced line-height */}
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-black tracking-tight text-white leading-[1.12]">
+                Mais interessados <br className="hidden sm:inline" />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-300">
                   se tornando alunos.
-                </span> <br />
-                Mais alunos <br className="hidden sm:block" />
+                </span>{' '}
+                <br className="hidden sm:inline" />
+                Mais alunos <br className="hidden sm:inline" />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-300 to-emerald-400">
                   permanecendo com você.
                 </span>
@@ -312,12 +339,12 @@ export default function LandingPage({ onOpenDashboard }) {
               </p>
 
               {/* Action Buttons */}
-              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5">
                 <button
                   onClick={onOpenDashboard}
-                  className="w-full sm:w-auto px-8 py-4 rounded-xl font-black text-sm uppercase tracking-wider btn-emerald flex items-center justify-center gap-2.5 cursor-pointer group shadow-2xl"
+                  className="w-full sm:w-auto px-8 py-4 rounded-xl font-black text-sm uppercase tracking-wider btn-emerald flex items-center justify-center gap-2.5 cursor-pointer group shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all"
                 >
-                  <span>Explorar Demonstração</span>
+                  <span className="whitespace-nowrap">Explorar Demonstração</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
 
@@ -325,15 +352,15 @@ export default function LandingPage({ onOpenDashboard }) {
                   href="#oportunidades"
                   className="w-full sm:w-auto px-6 py-4 rounded-xl font-bold text-xs uppercase tracking-wider text-slate-200 hover:text-white bg-slate-900/80 hover:bg-slate-800 border border-white/15 hover:border-emerald-500/40 transition-all flex items-center justify-center gap-2"
                 >
-                  <span>Conhecer a Plataforma</span>
+                  <span className="whitespace-nowrap">Conhecer a Plataforma</span>
                 </a>
 
                 <a
                   href="#calculadora"
                   className="w-full sm:w-auto px-5 py-4 rounded-xl font-bold text-xs uppercase tracking-wider text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-all flex items-center justify-center gap-2"
                 >
-                  <Calculator className="w-4 h-4" />
-                  <span>Simular Retorno</span>
+                  <Calculator className="w-4 h-4 flex-shrink-0" />
+                  <span className="whitespace-nowrap">Simular Retorno</span>
                 </a>
               </div>
 
