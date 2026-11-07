@@ -33,7 +33,13 @@ import {
   FileSpreadsheet,
   Download,
   Dumbbell,
-  Waves
+  Waves,
+  Kanban,
+  Table as TableIcon,
+  Flame,
+  Volume2,
+  VolumeX,
+  Activity
 } from 'lucide-react';
 import BrandLogo from './BrandLogo';
 import WhatsAppSimulatorModal from './WhatsAppSimulatorModal';
@@ -60,6 +66,9 @@ export default function Dashboard({ onReturnToLanding }) {
   const [activeTab, setActiveTab] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // View mode for Leads: 'table' vs 'kanban'
+  const [leadsViewMode, setLeadsViewMode] = useState('kanban');
+
   // Leads state with local persistence
   const [leads, setLeads] = useState(() => {
     const saved = localStorage.getItem('movimento_leads');
@@ -83,6 +92,9 @@ export default function Dashboard({ onReturnToLanding }) {
     const saved = localStorage.getItem('movimento_automations');
     return saved ? JSON.parse(saved) : INITIAL_AUTOMATIONS;
   });
+
+  // Sound enabled state
+  const [soundEnabled, setSoundEnabled] = useState(true);
 
   // Save changes to localStorage
   useEffect(() => {
@@ -116,10 +128,32 @@ export default function Dashboard({ onReturnToLanding }) {
   const [hubInputMessage, setHubInputMessage] = useState('');
   const [hubChatMessages, setHubChatMessages] = useState([
     { id: '1', sender: 'lead', text: 'Olá! Como funciona a matrícula para musculação e natação?', time: '14:20' },
-    { id: '2', sender: 'staff', text: 'Olá! A Academia Movimento oferece o plano Combo Musculação + Natação em piscina aquecida por R$ 249,90/mês. Quer agendar uma aula experimental?', time: '14:22' }
+    { id: '2', sender: 'staff', text: 'Olá! A Academia Movimento oferece o plano Combo Musculação + Natação em piscina aquecida por R$ 249,90/mês. Quer agendar uma aula experimental gratuita?', time: '14:22' }
   ]);
 
+  // Subtle audio notification using Web Audio API
+  const playChime = () => {
+    if (!soundEnabled) return;
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15); // A5
+      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.3);
+    } catch (e) {
+      // AudioContext not allowed or not supported
+    }
+  };
+
   const showToast = (msg) => {
+    playChime();
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
   };
@@ -149,12 +183,15 @@ export default function Dashboard({ onReturnToLanding }) {
   // Lead update action
   const handleUpdateLeadStatus = (leadId, newStatus) => {
     setLeads(prev => prev.map(l => l.id === leadId ? { ...l, status: newStatus } : l));
-    showToast(`Status atualizado para "${newStatus}" com sucesso!`);
+    if (newStatus === 'Matrícula concluída') {
+      confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } });
+    }
+    showToast(`Status atualizado para "${newStatus}"!`);
   };
 
   const handleAddLead = (newLead) => {
     setLeads(prev => [newLead, ...prev]);
-    showToast(`Novo interessado ${newLead.name} adicionado com sucesso!`);
+    showToast(`Interessado ${newLead.name} adicionado ao funil!`);
   };
 
   // Quick dispatch for Ex-Student campaign
@@ -169,14 +206,14 @@ export default function Dashboard({ onReturnToLanding }) {
       }
       return s;
     }));
-    confetti({ particleCount: 30, spread: 50, origin: { y: 0.6 } });
-    showToast(`Campanha de retorno enviada via WhatsApp para o ex-aluno!`);
+    confetti({ particleCount: 40, spread: 60, origin: { y: 0.6 } });
+    showToast(`Campanha de reativação autorizada enviada via WhatsApp!`);
   };
 
   // Quick toggle automation
   const handleToggleAutomation = (id) => {
     setAutomations(prev => prev.map(a => a.id === id ? { ...a, active: !a.active } : a));
-    showToast('Regra de automação atualizada!');
+    showToast('Régua de automação atualizada!');
   };
 
   // Experimental class attendance action
@@ -195,7 +232,7 @@ export default function Dashboard({ onReturnToLanding }) {
     return matchesSearch && matchesStatus && matchesInterest;
   });
 
-  // Recovery leads (leads awaiting reply, after class, or in negotiation)
+  // Recovery leads
   const recoveryLeads = leads.filter(l => 
     l.status === 'Aguardando resposta' || 
     l.status === 'Aula realizada' || 
@@ -203,36 +240,59 @@ export default function Dashboard({ onReturnToLanding }) {
     l.daysInactive > 1
   );
 
+  // Kanban Columns
+  const kanbanColumns = [
+    { title: "Novo Interessado", status: "Novo interessado", color: "border-blue-500/30 text-blue-400" },
+    { title: "Aguardando Retorno", status: "Aguardando resposta", color: "border-amber-500/30 text-amber-400" },
+    { title: "Experimental (Agendada / Realizada)", statuses: ["Aula experimental agendada", "Aula realizada"], color: "border-purple-500/30 text-purple-400" },
+    { title: "Em Negociação", status: "Em negociação", color: "border-orange-500/30 text-orange-400" },
+    { title: "Matrícula Concluída", status: "Matrícula concluída", color: "border-emerald-500/40 text-emerald-400" }
+  ];
+
   return (
-    <div className="min-h-screen bg-[#070b12] text-slate-100 flex flex-col antialiased">
+    <div className="min-h-screen bg-[#05070c] text-slate-100 flex flex-col antialiased">
       
       {/* Toast Notification */}
       {toastMessage && (
         <div 
           role="status" 
           aria-live="polite"
-          className="fixed top-5 right-5 z-50 glass-panel px-4 py-3 rounded-xl border border-emerald-500/40 text-emerald-300 text-xs font-semibold shadow-2xl flex items-center gap-2.5 animate-bounce"
+          className="fixed top-5 right-5 z-50 glass-panel px-4 py-3 rounded-2xl border border-emerald-500/50 text-emerald-300 text-xs font-bold shadow-2xl flex items-center gap-3 animate-bounce"
         >
-          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          </div>
           <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* Top Banner: Demonstrative Notice */}
-      <aside aria-label="Aviso Institucional" className="bg-[#0b1322] border-b border-white/5 px-4 py-2 flex items-center justify-between text-xs text-slate-400 flex-wrap gap-2">
+      {/* Top Professional Authority Header */}
+      <aside aria-label="Aviso Institucional" className="bg-[#070d18] border-b border-white/10 px-4 py-2 flex items-center justify-between text-xs text-slate-400 flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true"></span>
-          <span className="font-semibold text-slate-200">Painel Movimento Growth</span>
-          <span className="hidden sm:inline">• Ambiente Demonstrativo com Dados Fictícios • Planaltina-DF</span>
+          <span className="font-extrabold text-white uppercase font-mono tracking-wider text-[11px]">MOVIMENTO GROWTH OS</span>
+          <span className="text-slate-500">•</span>
+          <span className="hidden sm:inline text-slate-300">Ambiente Comercial da <strong>Academia Movimento</strong> (Planaltina-DF • +30 Anos)</span>
         </div>
+
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-mono">
+          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[11px] font-mono font-bold">
             <ShieldCheck className="w-3.5 h-3.5" /> API WhatsApp Conectada
           </div>
+
+          <button
+            onClick={() => setSoundEnabled(!soundEnabled)}
+            aria-label={soundEnabled ? "Desativar efeitos sonoros" : "Ativar efeitos sonoros"}
+            className="p-1 text-slate-400 hover:text-white transition-colors"
+            title={soundEnabled ? "Som Ativado" : "Som Desativado"}
+          >
+            {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-emerald-400" /> : <VolumeX className="w-3.5 h-3.5 text-slate-500" />}
+          </button>
+
           <button
             onClick={onReturnToLanding}
             aria-label="Voltar para a Landing Page Comercial"
-            className="text-xs text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 px-2.5 py-1 rounded-lg border border-white/10 transition-colors cursor-pointer flex items-center gap-1"
+            className="text-xs text-slate-200 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 px-2.5 py-1 rounded-lg border border-white/10 transition-colors cursor-pointer flex items-center gap-1 font-semibold"
           >
             <span>Ver Landing Page</span>
             <ExternalLink className="w-3 h-3 text-emerald-400" />
@@ -245,7 +305,7 @@ export default function Dashboard({ onReturnToLanding }) {
         {/* SIDEBAR NAVIGATION */}
         <aside 
           aria-label="Menu Principal de Navegação"
-          className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#090d16] border-r border-white/10 flex flex-col transition-transform duration-300 lg:static lg:translate-x-0 ${
+          className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#080d16] border-r border-white/10 flex flex-col transition-transform duration-300 lg:static lg:translate-x-0 ${
             sidebarOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
@@ -262,23 +322,23 @@ export default function Dashboard({ onReturnToLanding }) {
           </div>
 
           {/* Navigation Links */}
-          <nav className="flex-1 p-3 space-y-1 overflow-y-auto text-xs font-medium" aria-label="Seções do Dashboard">
-            <div className="px-3 py-2 text-[10px] font-mono uppercase tracking-wider text-slate-500">
-              Menu Comercial
+          <nav className="flex-1 p-3 space-y-1 overflow-y-auto text-xs font-semibold" aria-label="Seções do Dashboard">
+            <div className="px-3 py-2 text-[10px] font-mono uppercase tracking-widest text-slate-500 font-bold">
+              Gestão Comercial
             </div>
 
             {[
               { id: 'overview', label: 'Visão Geral', icon: <LayoutDashboard className="w-4 h-4" /> },
-              { id: 'leads', label: 'Interessados', icon: <Users className="w-4 h-4" />, badge: leads.length },
+              { id: 'leads', label: 'Interessados (Funil)', icon: <Users className="w-4 h-4" />, badge: leads.length },
               { id: 'classes', label: 'Aulas Experimentais', icon: <CalendarCheck className="w-4 h-4" />, badge: '5' },
-              { id: 'enrollments', label: 'Matrículas', icon: <CheckCircle2 className="w-4 h-4" /> },
+              { id: 'enrollments', label: 'Matrículas & Pagamento', icon: <CheckCircle2 className="w-4 h-4" /> },
               { id: 'recovery', label: 'Recuperação de Alunos', icon: <RefreshCw className="w-4 h-4" />, badge: recoveryLeads.length, highlight: true },
               { id: 'reactivation', label: 'Reativação de Ex-Alunos', icon: <UserCheck className="w-4 h-4" /> },
-              { id: 'campaigns', label: 'Campanhas', icon: <Megaphone className="w-4 h-4" /> },
-              { id: 'conversations', label: 'Conversas (WhatsApp)', icon: <MessageSquare className="w-4 h-4" /> },
+              { id: 'campaigns', label: 'Campanhas Promocionais', icon: <Megaphone className="w-4 h-4" /> },
+              { id: 'conversations', label: 'Central de WhatsApp', icon: <MessageSquare className="w-4 h-4" /> },
               { id: 'reports', label: 'Relatórios Comerciais', icon: <BarChart3 className="w-4 h-4" /> },
-              { id: 'automations', label: 'Automações & Regras', icon: <Sparkles className="w-4 h-4" /> },
-              { id: 'settings', label: 'Configurações', icon: <Settings className="w-4 h-4" /> }
+              { id: 'automations', label: 'Automações & LGPD', icon: <Sparkles className="w-4 h-4" /> },
+              { id: 'settings', label: 'Configurações da Unidade', icon: <Settings className="w-4 h-4" /> }
             ].map((item) => (
               <button
                 key={item.id}
@@ -289,7 +349,7 @@ export default function Dashboard({ onReturnToLanding }) {
                 aria-current={activeTab === item.id ? 'page' : undefined}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all cursor-pointer ${
                   activeTab === item.id
-                    ? 'bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/30'
+                    ? 'bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/30 shadow-lg shadow-emerald-950/20'
                     : 'text-slate-300 hover:text-white hover:bg-white/5'
                 }`}
               >
@@ -301,7 +361,7 @@ export default function Dashboard({ onReturnToLanding }) {
                 </div>
                 {item.badge && (
                   <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-full ${
-                    item.highlight ? 'bg-orange-500/20 text-orange-400 font-bold' : 'bg-slate-800 text-slate-300'
+                    item.highlight ? 'bg-orange-500/20 text-orange-400 font-extrabold border border-orange-500/30' : 'bg-slate-800 text-slate-300'
                   }`}>
                     {item.badge}
                   </span>
@@ -311,13 +371,14 @@ export default function Dashboard({ onReturnToLanding }) {
           </nav>
 
           {/* Sidebar Footer with Client Metadata */}
-          <div className="p-3 border-t border-white/10 bg-[#060a10]">
-            <div className="p-2.5 rounded-xl bg-slate-900 border border-white/5 text-[11px] space-y-1">
-              <div className="font-bold text-white flex items-center gap-1.5">
+          <div className="p-3 border-t border-white/10 bg-[#060910]">
+            <div className="p-3 rounded-xl bg-slate-900 border border-white/5 text-[11px] space-y-1">
+              <div className="font-extrabold text-white flex items-center gap-1.5">
+                <Dumbbell className="w-3.5 h-3.5 text-emerald-400" />
                 <span>Academia Movimento</span>
               </div>
-              <div className="text-slate-400">Planaltina - DF • 30+ Anos</div>
-              <div className="text-[10px] text-emerald-400 font-mono">@ac.movimentopl</div>
+              <div className="text-slate-400">Planaltina - DF • 30+ Anos de Excelência</div>
+              <div className="text-[10px] text-emerald-400 font-mono font-semibold">@ac.movimentopl</div>
             </div>
           </div>
         </aside>
@@ -325,8 +386,8 @@ export default function Dashboard({ onReturnToLanding }) {
         {/* MAIN CONTENT AREA */}
         <main className="flex-1 flex flex-col min-w-0 overflow-y-auto" id="main-content">
           
-          {/* Topbar */}
-          <header className="sticky top-0 z-30 bg-[#090d16]/90 backdrop-blur-md border-b border-white/10 px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+          {/* Topbar Command Header */}
+          <header className="sticky top-0 z-30 bg-[#080d16]/90 backdrop-blur-md border-b border-white/10 px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setSidebarOpen(true)}
@@ -336,14 +397,14 @@ export default function Dashboard({ onReturnToLanding }) {
                 <Menu className="w-5 h-5" />
               </button>
               <div>
-                <h1 className="text-base sm:text-lg font-bold text-white capitalize">
+                <h1 className="text-base sm:text-lg font-black text-white capitalize">
                   {activeTab === 'overview' && 'Visão Geral & Indicadores'}
-                  {activeTab === 'leads' && 'Gestão de Interessados (Pipeline)'}
+                  {activeTab === 'leads' && 'Gestão de Interessados (Pipeline Comercial)'}
                   {activeTab === 'classes' && 'Aulas Experimentais Agendadas'}
-                  {activeTab === 'enrollments' && 'Matrículas & Conversões'}
+                  {activeTab === 'enrollments' && 'Matrículas & Pagamento Integrado'}
                   {activeTab === 'recovery' && 'Recuperação de Interessados'}
                   {activeTab === 'reactivation' && 'Reativação de Ex-Alunos'}
-                  {activeTab === 'campaigns' && 'Campanhas & Ações Comerciais'}
+                  {activeTab === 'campaigns' && 'Campanhas & Ações Promocionais'}
                   {activeTab === 'conversations' && 'Central de Conversas WhatsApp'}
                   {activeTab === 'reports' && 'Relatórios de Desempenho Comercial'}
                   {activeTab === 'automations' && 'Régua de Automações & LGPD'}
@@ -357,13 +418,38 @@ export default function Dashboard({ onReturnToLanding }) {
 
             {/* Quick Actions in Topbar */}
             <div className="flex items-center gap-2 sm:gap-3">
+              {activeTab === 'leads' && (
+                <div className="flex items-center bg-slate-900 border border-white/10 rounded-xl p-1 gap-1">
+                  <button
+                    onClick={() => setLeadsViewMode('kanban')}
+                    aria-label="Modo Funil Kanban"
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
+                      leadsViewMode === 'kanban' ? 'bg-emerald-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <Kanban className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Kanban</span>
+                  </button>
+                  <button
+                    onClick={() => setLeadsViewMode('table')}
+                    aria-label="Modo Tabela"
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
+                      leadsViewMode === 'table' ? 'bg-emerald-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <TableIcon className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Tabela</span>
+                  </button>
+                </div>
+              )}
+
               <button
                 onClick={() => setIsAddLeadModalOpen(true)}
-                aria-label="Registrar novo interessado"
-                className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+                aria-label="Cadastrar novo interessado"
+                className="px-3.5 py-2 rounded-xl btn-emerald font-extrabold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
-                <span className="hidden sm:inline">Novo Interessado</span>
+                <span className="hidden sm:inline">Novo Lead</span>
               </button>
             </div>
           </header>
@@ -375,60 +461,60 @@ export default function Dashboard({ onReturnToLanding }) {
             {activeTab === 'overview' && (
               <div className="space-y-6 animate-fade-in">
                 
-                {/* 6 KPI Cards */}
+                {/* 6 High-Impact Luxury KPI Cards */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-                  <div className="glass-card p-4 rounded-2xl border border-white/10 hover:border-emerald-500/30 transition-all">
-                    <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                  <div className="glass-card p-4 rounded-2xl border border-white/10 hover:border-emerald-500/40 transition-all">
+                    <div className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider mb-1">
                       Total Interessados
                     </div>
-                    <div className="text-2xl font-black text-white font-mono">{KPI_METRICS.totalLeads}</div>
-                    <div className="mt-2 text-[10px] text-emerald-400 flex items-center gap-1">
+                    <div className="text-2xl sm:text-3xl font-black text-white font-mono">{KPI_METRICS.totalLeads}</div>
+                    <div className="mt-2 text-[10px] text-emerald-400 font-bold flex items-center gap-1">
                       <TrendingUp className="w-3 h-3" /> +18 este mês
                     </div>
                   </div>
 
-                  <div className="glass-card p-4 rounded-2xl border border-amber-500/30 bg-amber-500/5 hover:border-amber-500/50 transition-all">
-                    <div className="text-[11px] font-semibold text-amber-300 uppercase tracking-wider mb-1">
+                  <div className="glass-card p-4 rounded-2xl border border-amber-500/40 bg-amber-500/5 hover:border-amber-500/60 transition-all">
+                    <div className="text-[10px] font-mono font-bold text-amber-300 uppercase tracking-wider mb-1">
                       Aguardando Retorno
                     </div>
-                    <div className="text-2xl font-black text-amber-400 font-mono">{KPI_METRICS.waitingReply}</div>
+                    <div className="text-2xl sm:text-3xl font-black text-amber-400 font-mono">{KPI_METRICS.waitingReply}</div>
                     <div className="mt-2 text-[10px] text-slate-400">
-                      Oportunidades quentes
+                      Oportunidades ativas
                     </div>
                   </div>
 
-                  <div className="glass-card p-4 rounded-2xl border border-white/10 hover:border-blue-500/30 transition-all">
-                    <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                  <div className="glass-card p-4 rounded-2xl border border-blue-500/30 hover:border-blue-500/50 transition-all">
+                    <div className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider mb-1">
                       Aulas Realizadas
                     </div>
-                    <div className="text-2xl font-black text-blue-400 font-mono">{KPI_METRICS.experimentalClassesCompleted}</div>
-                    <div className="mt-2 text-[10px] text-emerald-400 font-mono">
+                    <div className="text-2xl sm:text-3xl font-black text-blue-400 font-mono">{KPI_METRICS.experimentalClassesCompleted}</div>
+                    <div className="mt-2 text-[10px] text-emerald-400 font-mono font-bold">
                       81.8% presença
                     </div>
                   </div>
 
-                  <div className="glass-card p-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 hover:border-emerald-500/50 transition-all">
-                    <div className="text-[11px] font-semibold text-emerald-300 uppercase tracking-wider mb-1">
-                      Matrículas Convertidas
+                  <div className="glass-card p-4 rounded-2xl border border-emerald-500/40 bg-emerald-500/5 hover:border-emerald-500/60 transition-all">
+                    <div className="text-[10px] font-mono font-bold text-emerald-300 uppercase tracking-wider mb-1">
+                      Matrículas Fechadas
                     </div>
-                    <div className="text-2xl font-black text-emerald-400 font-mono">{KPI_METRICS.convertedEnrollments}</div>
-                    <div className="mt-2 text-[10px] text-emerald-400 font-mono">
+                    <div className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono">{KPI_METRICS.convertedEnrollments}</div>
+                    <div className="mt-2 text-[10px] text-emerald-400 font-mono font-bold">
                       Taxa de 36.3%
                     </div>
                   </div>
 
-                  <div className="glass-card p-4 rounded-2xl border border-white/10 hover:border-purple-500/30 transition-all">
-                    <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                  <div className="glass-card p-4 rounded-2xl border border-purple-500/30 hover:border-purple-500/50 transition-all">
+                    <div className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider mb-1">
                       Ex-Alunos Reativados
                     </div>
-                    <div className="text-2xl font-black text-purple-400 font-mono">{KPI_METRICS.reactivatedExStudents}</div>
+                    <div className="text-2xl sm:text-3xl font-black text-purple-400 font-mono">{KPI_METRICS.reactivatedExStudents}</div>
                     <div className="mt-2 text-[10px] text-slate-400">
                       Campanhas de volta
                     </div>
                   </div>
 
-                  <div className="glass-card p-4 rounded-2xl border border-emerald-500/40 bg-gradient-to-br from-emerald-950/20 to-slate-900 hover:border-emerald-500/60 transition-all">
-                    <div className="text-[11px] font-semibold text-emerald-300 uppercase tracking-wider mb-1">
+                  <div className="glass-card p-4 rounded-2xl border border-emerald-500/50 bg-gradient-to-br from-[#0c1f18] to-slate-900 hover:border-emerald-500/70 transition-all shadow-xl">
+                    <div className="text-[10px] font-mono font-bold text-emerald-300 uppercase tracking-wider mb-1">
                       Receita Recuperada
                     </div>
                     <div className="text-xl sm:text-2xl font-black text-emerald-300 font-mono">{KPI_METRICS.potentialRevenueRecovered}</div>
@@ -440,14 +526,14 @@ export default function Dashboard({ onReturnToLanding }) {
 
                 {/* Charts Grid 1 */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                  <div className="lg:col-span-8 glass-panel p-5 rounded-2xl border border-white/10">
+                  <div className="lg:col-span-8 glass-panel p-5 sm:p-6 rounded-2xl border border-white/10">
                     <div className="flex items-center justify-between mb-4">
                       <div>
-                        <h2 className="text-sm font-bold text-white">Evolução de Interessados e Matrículas</h2>
-                        <p className="text-xs text-slate-400">Acompanhamento contínuo dos contatos ao longo dos últimos meses</p>
+                        <h2 className="text-sm font-bold text-white">Evolução Mensal: Interessados vs. Matrículas</h2>
+                        <p className="text-xs text-slate-400">Crescimento contínuo no aproveitamento da base de Planaltina-DF</p>
                       </div>
-                      <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                        Demonstração
+                      <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 font-bold">
+                        Dados Demonstrativos
                       </span>
                     </div>
                     <div className="h-64">
@@ -455,7 +541,7 @@ export default function Dashboard({ onReturnToLanding }) {
                     </div>
                   </div>
 
-                  <div className="lg:col-span-4 glass-panel p-5 rounded-2xl border border-white/10 flex flex-col justify-between">
+                  <div className="lg:col-span-4 glass-panel p-5 sm:p-6 rounded-2xl border border-white/10 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <h2 className="text-sm font-bold text-white">Origem dos Contatos</h2>
@@ -471,11 +557,11 @@ export default function Dashboard({ onReturnToLanding }) {
 
                 {/* Charts Grid 2 */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                  <div className="lg:col-span-6 glass-panel p-5 rounded-2xl border border-white/10">
+                  <div className="lg:col-span-6 glass-panel p-5 sm:p-6 rounded-2xl border border-white/10">
                     <div className="flex items-center justify-between mb-4">
                       <div>
-                        <h2 className="text-sm font-bold text-white">Resultados de Recuperação Comercial</h2>
-                        <p className="text-xs text-slate-400">Pessoas que esfriaram o contato e foram convertidas após réguas ativas</p>
+                        <h2 className="text-sm font-bold text-white">Resultados de Recuperação Ativa</h2>
+                        <p className="text-xs text-slate-400">Contatos que esfriaram e foram convertidos após réguas de acompanhamento</p>
                       </div>
                     </div>
                     <div className="h-60">
@@ -483,11 +569,11 @@ export default function Dashboard({ onReturnToLanding }) {
                     </div>
                   </div>
 
-                  <div className="lg:col-span-6 glass-panel p-5 rounded-2xl border border-white/10">
+                  <div className="lg:col-span-6 glass-panel p-5 sm:p-6 rounded-2xl border border-white/10">
                     <div className="flex items-center justify-between mb-4">
                       <div>
-                        <h2 className="text-sm font-bold text-white">Matrículas Totais: Orgânicas vs Recuperadas</h2>
-                        <p className="text-xs text-slate-400">O impacto direto da Movimento Growth no faturamento da academia</p>
+                        <h2 className="text-sm font-bold text-white">Matrículas Orgânicas vs. Recuperadas</h2>
+                        <p className="text-xs text-slate-400">Impacto direto no caixa gerado pelo resgate de contatos</p>
                       </div>
                     </div>
                     <div className="h-60">
@@ -496,72 +582,10 @@ export default function Dashboard({ onReturnToLanding }) {
                   </div>
                 </div>
 
-                {/* Recent Activity Quick Table */}
-                <div className="glass-panel p-5 rounded-2xl border border-white/10">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h2 className="text-sm font-bold text-white">Últimos Interessados em Acompanhamento</h2>
-                      <p className="text-xs text-slate-400">Contatos recentes necessitando de ação comercial</p>
-                    </div>
-                    <button
-                      onClick={() => setActiveTab('leads')}
-                      className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1 cursor-pointer"
-                    >
-                      Ver todos os {leads.length} interessados <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs" aria-label="Últimos interessados da academia">
-                      <thead className="bg-slate-800/60 text-slate-400 uppercase tracking-wider font-mono text-[10px]">
-                        <tr>
-                          <th scope="col" className="py-2.5 px-3">Nome</th>
-                          <th scope="col" className="py-2.5 px-3">Interesse / Plano</th>
-                          <th scope="col" className="py-2.5 px-3">Origem</th>
-                          <th scope="col" className="py-2.5 px-3">Status</th>
-                          <th scope="col" className="py-2.5 px-3">Próxima Ação Sugerida</th>
-                          <th scope="col" className="py-2.5 px-3 text-right">Ação</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-white/5">
-                        {leads.slice(0, 4).map((l) => (
-                          <tr key={l.id} className="hover:bg-white/5 transition-colors">
-                            <td className="py-3 px-3 font-semibold text-white">
-                              {l.name}
-                              <div className="text-[10px] text-slate-400 font-mono font-normal">{l.phone}</div>
-                            </td>
-                            <td className="py-3 px-3 text-slate-200">
-                              {l.interest}
-                              <div className="text-[10px] text-slate-400">{l.plan}</div>
-                            </td>
-                            <td className="py-3 px-3 text-slate-300">{l.origin}</td>
-                            <td className="py-3 px-3">
-                              <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] border ${getStatusBadge(l.status)}`}>
-                                {l.status}
-                              </span>
-                            </td>
-                            <td className="py-3 px-3 text-slate-400 text-[11px]">{l.nextAction}</td>
-                            <td className="py-3 px-3 text-right">
-                              <button
-                                onClick={() => setSelectedLeadForWhatsApp(l)}
-                                aria-label={`Iniciar conversa no WhatsApp com ${l.name}`}
-                                className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-semibold text-[11px] border border-emerald-500/30 transition-colors cursor-pointer inline-flex items-center gap-1"
-                              >
-                                <MessageSquare className="w-3 h-3" />
-                                <span>WhatsApp</span>
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
               </div>
             )}
 
-            {/* VIEW 2: GESTÃO DE INTERESSADOS */}
+            {/* VIEW 2: GESTÃO DE INTERESSADOS (KANBAN OU TABELA) */}
             {activeTab === 'leads' && (
               <div className="space-y-5 animate-fade-in">
                 
@@ -612,7 +636,7 @@ export default function Dashboard({ onReturnToLanding }) {
                     <button
                       onClick={() => setIsAddLeadModalOpen(true)}
                       aria-label="Cadastrar novo interessado"
-                      className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs whitespace-nowrap cursor-pointer transition-colors shadow-md flex items-center gap-1.5"
+                      className="px-3.5 py-2 rounded-xl btn-emerald font-extrabold text-xs whitespace-nowrap cursor-pointer transition-colors shadow-md flex items-center gap-1.5"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>Cadastrar Lead</span>
@@ -620,80 +644,152 @@ export default function Dashboard({ onReturnToLanding }) {
                   </div>
                 </div>
 
-                {/* Leads Table */}
-                <div className="glass-panel rounded-2xl border border-white/10 overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs" aria-label="Tabela completa de interessados">
-                      <thead className="bg-[#121a29] text-slate-400 uppercase tracking-wider font-mono text-[10px] border-b border-white/10">
-                        <tr>
-                          <th scope="col" className="py-3 px-4">Nome do Interessado</th>
-                          <th scope="col" className="py-3 px-4">Telefone (Fictício)</th>
-                          <th scope="col" className="py-3 px-4">Interesse / Plano</th>
-                          <th scope="col" className="py-3 px-4">Origem</th>
-                          <th scope="col" className="py-3 px-4">1º Contato</th>
-                          <th scope="col" className="py-3 px-4">Status Atual</th>
-                          <th scope="col" className="py-3 px-4">Próxima Ação</th>
-                          <th scope="col" className="py-3 px-4 text-center">Ações Rápidas</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-white/5">
-                        {filteredLeads.map((l) => (
-                          <tr key={l.id} className="hover:bg-white/5 transition-colors">
-                            <td className="py-3 px-4 font-semibold text-white">
-                              <div className="flex items-center gap-2">
-                                <div className="w-7 h-7 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-xs font-bold text-emerald-400">
-                                  {l.name[0]}
-                                </div>
-                                <span>{l.name}</span>
-                              </div>
-                            </td>
-                            <td className="py-3 px-4 font-mono text-slate-300">{l.phone}</td>
-                            <td className="py-3 px-4">
-                              <div className="text-slate-100 font-medium">{l.interest}</div>
-                              <div className="text-[10px] text-slate-400">{l.plan}</div>
-                            </td>
-                            <td className="py-3 px-4 text-slate-300">{l.origin}</td>
-                            <td className="py-3 px-4 font-mono text-slate-400">{l.firstContact}</td>
-                            <td className="py-3 px-4">
-                              <select
-                                value={l.status}
-                                aria-label={`Alterar status de ${l.name}`}
-                                onChange={(e) => handleUpdateLeadStatus(l.id, e.target.value)}
-                                className={`text-[11px] font-semibold rounded-lg px-2 py-1 border focus:outline-none cursor-pointer ${getStatusBadge(l.status)}`}
-                              >
-                                <option value="Novo interessado">Novo interessado</option>
-                                <option value="Aguardando resposta">Aguardando resposta</option>
-                                <option value="Aula experimental agendada">Aula experimental agendada</option>
-                                <option value="Aula realizada">Aula realizada</option>
-                                <option value="Em negociação">Em negociação</option>
-                                <option value="Matrícula concluída">Matrícula concluída</option>
-                                <option value="Sem interesse">Sem interesse</option>
-                              </select>
-                            </td>
-                            <td className="py-3 px-4 text-slate-300 text-[11px] max-w-xs truncate" title={l.nextAction}>
-                              {l.nextAction}
-                            </td>
-                            <td className="py-3 px-4 text-center">
-                              <button
-                                onClick={() => setSelectedLeadForWhatsApp(l)}
-                                aria-label={`Abrir simulador de WhatsApp para ${l.name}`}
-                                className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-semibold text-[11px] border border-emerald-500/30 transition-colors cursor-pointer flex items-center gap-1 mx-auto"
-                              >
-                                <MessageSquare className="w-3.5 h-3.5" />
-                                <span>WhatsApp</span>
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                {/* KANBAN FUNNEL VIEW */}
+                {leadsViewMode === 'kanban' ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    {kanbanColumns.map((col, idx) => {
+                      const colLeads = filteredLeads.filter(l => 
+                        col.statuses ? col.statuses.includes(l.status) : l.status === col.status
+                      );
 
-                  <div className="p-3 bg-slate-900/60 border-t border-white/5 flex items-center justify-between text-xs text-slate-400">
-                    <span>Exibindo {filteredLeads.length} de {leads.length} contatos</span>
-                    <span className="text-[11px]">Dados demonstrativos locais persistidos</span>
+                      return (
+                        <div key={idx} className="glass-panel p-3.5 rounded-2xl border border-white/10 flex flex-col">
+                          <div className="flex items-center justify-between pb-3 border-b border-white/5 mb-3">
+                            <span className={`text-xs font-extrabold uppercase font-mono ${col.color}`}>
+                              {col.title}
+                            </span>
+                            <span className="text-xs font-mono font-bold bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full">
+                              {colLeads.length}
+                            </span>
+                          </div>
+
+                          <div className="space-y-3 flex-1 overflow-y-auto max-h-[600px] pr-1">
+                            {colLeads.map((lead) => (
+                              <div 
+                                key={lead.id}
+                                className="p-3.5 rounded-xl bg-slate-900 border border-white/10 hover:border-emerald-500/40 transition-all space-y-2 group shadow-md"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="font-extrabold text-white text-xs truncate">{lead.name}</span>
+                                  <span className="text-[10px] text-slate-400 font-mono">{lead.phone}</span>
+                                </div>
+
+                                <div className="text-[11px] text-slate-300 flex items-center gap-1 font-medium">
+                                  <span className="text-emerald-400">●</span> {lead.interest}
+                                </div>
+
+                                <div className="text-[10px] text-slate-400 truncate">
+                                  Origem: {lead.origin}
+                                </div>
+
+                                <div className="pt-2 border-t border-white/5 flex items-center justify-between gap-1">
+                                  <select
+                                    value={lead.status}
+                                    onChange={(e) => handleUpdateLeadStatus(lead.id, e.target.value)}
+                                    aria-label={`Mover status de ${lead.name}`}
+                                    className="text-[10px] bg-slate-800 text-slate-200 rounded px-1.5 py-0.5 border border-white/10 focus:outline-none"
+                                  >
+                                    <option value="Novo interessado">Novo</option>
+                                    <option value="Aguardando resposta">Aguardando</option>
+                                    <option value="Aula experimental agendada">Exp. Agendada</option>
+                                    <option value="Aula realizada">Exp. Realizada</option>
+                                    <option value="Em negociação">Negociação</option>
+                                    <option value="Matrícula concluída">Concluída</option>
+                                  </select>
+
+                                  <button
+                                    onClick={() => setSelectedLeadForWhatsApp(lead)}
+                                    aria-label={`Abrir WhatsApp para ${lead.name}`}
+                                    className="p-1 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors cursor-pointer"
+                                    title="WhatsApp"
+                                  >
+                                    <MessageSquare className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+
+                            {colLeads.length === 0 && (
+                              <div className="p-4 text-center text-xs text-slate-500 italic">
+                                Nenhum lead nesta etapa
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                </div>
+                ) : (
+                  /* TABLE VIEW */
+                  <div className="glass-panel rounded-2xl border border-white/10 overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs" aria-label="Tabela completa de interessados">
+                        <thead className="bg-[#0e1626] text-slate-400 uppercase tracking-wider font-mono text-[10px] border-b border-white/10">
+                          <tr>
+                            <th scope="col" className="py-3 px-4">Nome do Interessado</th>
+                            <th scope="col" className="py-3 px-4">Telefone (Fictício)</th>
+                            <th scope="col" className="py-3 px-4">Interesse / Plano</th>
+                            <th scope="col" className="py-3 px-4">Origem</th>
+                            <th scope="col" className="py-3 px-4">1º Contato</th>
+                            <th scope="col" className="py-3 px-4">Status Atual</th>
+                            <th scope="col" className="py-3 px-4">Próxima Ação</th>
+                            <th scope="col" className="py-3 px-4 text-center">Ações Rápidas</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5">
+                          {filteredLeads.map((l) => (
+                            <tr key={l.id} className="hover:bg-white/5 transition-colors">
+                              <td className="py-3 px-4 font-semibold text-white">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-7 h-7 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-xs font-bold text-emerald-400">
+                                    {l.name[0]}
+                                  </div>
+                                  <span>{l.name}</span>
+                                </div>
+                              </td>
+                              <td className="py-3 px-4 font-mono text-slate-300">{l.phone}</td>
+                              <td className="py-3 px-4">
+                                <div className="text-slate-100 font-medium">{l.interest}</div>
+                                <div className="text-[10px] text-slate-400">{l.plan}</div>
+                              </td>
+                              <td className="py-3 px-4 text-slate-300">{l.origin}</td>
+                              <td className="py-3 px-4 font-mono text-slate-400">{l.firstContact}</td>
+                              <td className="py-3 px-4">
+                                <select
+                                  value={l.status}
+                                  aria-label={`Alterar status de ${l.name}`}
+                                  onChange={(e) => handleUpdateLeadStatus(l.id, e.target.value)}
+                                  className={`text-[11px] font-semibold rounded-lg px-2 py-1 border focus:outline-none cursor-pointer ${getStatusBadge(l.status)}`}
+                                >
+                                  <option value="Novo interessado">Novo interessado</option>
+                                  <option value="Aguardando resposta">Aguardando resposta</option>
+                                  <option value="Aula experimental agendada">Aula experimental agendada</option>
+                                  <option value="Aula realizada">Aula realizada</option>
+                                  <option value="Em negociação">Em negociação</option>
+                                  <option value="Matrícula concluída">Matrícula concluída</option>
+                                  <option value="Sem interesse">Sem interesse</option>
+                                </select>
+                              </td>
+                              <td className="py-3 px-4 text-slate-300 text-[11px] max-w-xs truncate" title={l.nextAction}>
+                                {l.nextAction}
+                              </td>
+                              <td className="py-3 px-4 text-center">
+                                <button
+                                  onClick={() => setSelectedLeadForWhatsApp(l)}
+                                  aria-label={`Abrir simulador de WhatsApp para ${l.name}`}
+                                  className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-semibold text-[11px] border border-emerald-500/30 transition-colors cursor-pointer flex items-center gap-1 mx-auto"
+                                >
+                                  <MessageSquare className="w-3.5 h-3.5" />
+                                  <span>WhatsApp</span>
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
 
               </div>
             )}
@@ -757,14 +853,14 @@ export default function Dashboard({ onReturnToLanding }) {
                           <button
                             onClick={() => handleClassStatus(cls.id, 'Realizada')}
                             aria-label={`Marcar aula de ${cls.leadName} como realizada`}
-                            className="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-semibold text-xs border border-emerald-500/30 transition-colors"
+                            className="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-semibold text-xs border border-emerald-500/30 transition-colors cursor-pointer"
                           >
                             ✓ Realizada
                           </button>
                           <button
                             onClick={() => handleClassStatus(cls.id, 'Não compareceu')}
                             aria-label={`Marcar falta (no-show) para ${cls.leadName}`}
-                            className="px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 font-semibold text-xs border border-rose-500/30 transition-colors"
+                            className="px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 font-semibold text-xs border border-rose-500/30 transition-colors cursor-pointer"
                           >
                             ✕ No-Show
                           </button>
@@ -780,7 +876,7 @@ export default function Dashboard({ onReturnToLanding }) {
                               });
                             }}
                             aria-label={`Enviar mensagem WhatsApp para ${cls.leadName}`}
-                            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs border border-white/10 transition-colors flex items-center gap-1"
+                            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs border border-white/10 transition-colors flex items-center gap-1 cursor-pointer"
                           >
                             <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
                             <span>Mensagem</span>
@@ -838,7 +934,7 @@ export default function Dashboard({ onReturnToLanding }) {
                     <button
                       onClick={() => showToast('Simulação de link de matrícula gerada!')}
                       aria-label="Gerar link demonstrativo de pagamento"
-                      className="px-3 py-1.5 rounded-lg bg-emerald-500 text-slate-950 font-bold text-xs hover:bg-emerald-400 transition-colors cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg btn-emerald font-extrabold text-xs transition-colors cursor-pointer"
                     >
                       Gerar Link Demonstração
                     </button>
@@ -873,7 +969,7 @@ export default function Dashboard({ onReturnToLanding }) {
                 <div className="glass-panel rounded-2xl border border-white/10 overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs" aria-label="Tabela de contatos para recuperação">
-                      <thead className="bg-[#121a29] text-slate-400 uppercase tracking-wider font-mono text-[10px] border-b border-white/10">
+                      <thead className="bg-[#0e1626] text-slate-400 uppercase tracking-wider font-mono text-[10px] border-b border-white/10">
                         <tr>
                           <th scope="col" className="py-3 px-4">Nome do Contato</th>
                           <th scope="col" className="py-3 px-4">Última Interação</th>
@@ -906,9 +1002,9 @@ export default function Dashboard({ onReturnToLanding }) {
                               <button
                                 onClick={() => setSelectedLeadForWhatsApp(rec)}
                                 aria-label={`Simular mensagem de WhatsApp para ${rec.name}`}
-                                className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition-all shadow-md shadow-emerald-500/20 flex items-center justify-center gap-1.5 mx-auto cursor-pointer"
+                                className="px-3 py-1.5 rounded-xl btn-emerald font-extrabold text-xs transition-all shadow-md flex items-center justify-center gap-1.5 mx-auto cursor-pointer"
                               >
-                                <MessageSquare className="w-3.5 h-3.5" />
+                                <MessageSquare className="w-3.5 h-3.5 text-slate-950" />
                                 <span>Simular WhatsApp</span>
                               </button>
                             </td>
@@ -924,7 +1020,7 @@ export default function Dashboard({ onReturnToLanding }) {
                   <div className="flex items-center gap-2 mb-2 text-emerald-400 text-xs font-bold font-mono uppercase tracking-wider">
                     <Sparkles className="w-4 h-4" /> Mensagem Padronizada de Acompanhamento (Requisito Oficial)
                   </div>
-                  <div className="p-4 rounded-xl bg-[#090e18] border border-white/10 text-sm text-slate-200 italic leading-relaxed">
+                  <div className="p-4 rounded-xl bg-[#070b14] border border-white/10 text-sm text-slate-200 italic leading-relaxed">
                     "Olá! Tudo bem? Você demonstrou interesse em conhecer nossos planos e gostaríamos de saber se ainda podemos ajudar. Nossa equipe está à disposição para tirar suas dúvidas!"
                   </div>
                   <div className="mt-3 flex items-center justify-between text-xs text-slate-400">
@@ -935,7 +1031,7 @@ export default function Dashboard({ onReturnToLanding }) {
                           setSelectedLeadForWhatsApp(recoveryLeads[0]);
                         }
                       }}
-                      className="text-emerald-400 font-semibold hover:underline flex items-center gap-1 cursor-pointer"
+                      className="text-emerald-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
                     >
                       Testar Envio com Lead Fictício <ArrowRight className="w-3 h-3" />
                     </button>
@@ -955,7 +1051,7 @@ export default function Dashboard({ onReturnToLanding }) {
                       <p className="text-xs text-slate-400">Campanhas segmentadas por período de ausência (60 a 180 dias) com condições de retorno</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
+                      <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 font-bold">
                         29 Alunos Reativados em 2026
                       </span>
                     </div>
@@ -963,7 +1059,7 @@ export default function Dashboard({ onReturnToLanding }) {
 
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs" aria-label="Tabela de reativação de ex-alunos">
-                      <thead className="bg-[#121a29] text-slate-400 uppercase tracking-wider font-mono text-[10px] border-b border-white/10">
+                      <thead className="bg-[#0e1626] text-slate-400 uppercase tracking-wider font-mono text-[10px] border-b border-white/10">
                         <tr>
                           <th scope="col" className="py-3 px-4">Nome do Ex-Aluno</th>
                           <th scope="col" className="py-3 px-4">Último Plano</th>
@@ -1004,7 +1100,7 @@ export default function Dashboard({ onReturnToLanding }) {
                                 <button
                                   onClick={() => handleDispatchExStudentCampaign(st.id)}
                                   aria-label={`Enviar campanha de reativação para ${st.name}`}
-                                  className="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-semibold text-xs border border-emerald-500/30 transition-colors cursor-pointer flex items-center gap-1 mx-auto"
+                                  className="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-bold text-xs border border-emerald-500/30 transition-colors cursor-pointer flex items-center gap-1 mx-auto"
                                 >
                                   <Send className="w-3 h-3" />
                                   <span>Enviar Campanha</span>
@@ -1030,7 +1126,7 @@ export default function Dashboard({ onReturnToLanding }) {
                   <div className="glass-panel p-5 rounded-2xl border border-white/10 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-mono uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">Ativa</span>
+                        <span className="text-xs font-mono uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded font-bold">Ativa</span>
                         <span className="text-xs text-slate-400 font-mono">Segmentada</span>
                       </div>
                       <h2 className="text-base font-bold text-white mb-2">Campanha Volta ao Treino (Sem Matrícula)</h2>
@@ -1039,10 +1135,10 @@ export default function Dashboard({ onReturnToLanding }) {
                       </p>
                     </div>
                     <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs">
-                      <span className="text-slate-400">Conversão: <strong className="text-white">28.4%</strong></span>
+                      <span className="text-slate-400">Conversão: <strong className="text-white font-mono">28.4%</strong></span>
                       <button 
                         onClick={() => showToast('Simulação de disparo em lote executada!')}
-                        className="text-emerald-400 font-semibold hover:underline cursor-pointer"
+                        className="text-emerald-400 font-bold hover:underline cursor-pointer"
                       >
                         Disparar Lote
                       </button>
@@ -1052,7 +1148,7 @@ export default function Dashboard({ onReturnToLanding }) {
                   <div className="glass-panel p-5 rounded-2xl border border-white/10 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-mono uppercase tracking-wider text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded">Ativa</span>
+                        <span className="text-xs font-mono uppercase tracking-wider text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded font-bold">Ativa</span>
                         <span className="text-xs text-slate-400 font-mono">Piscina Aquecida</span>
                       </div>
                       <h2 className="text-base font-bold text-white mb-2">Aquecimento de Verão • Natação & Hidro</h2>
@@ -1061,10 +1157,10 @@ export default function Dashboard({ onReturnToLanding }) {
                       </p>
                     </div>
                     <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs">
-                      <span className="text-slate-400">Conversão: <strong className="text-white">34.1%</strong></span>
+                      <span className="text-slate-400">Conversão: <strong className="text-white font-mono">34.1%</strong></span>
                       <button 
                         onClick={() => showToast('Simulação de disparo em lote executada!')}
-                        className="text-emerald-400 font-semibold hover:underline cursor-pointer"
+                        className="text-emerald-400 font-bold hover:underline cursor-pointer"
                       >
                         Disparar Lote
                       </button>
@@ -1074,7 +1170,7 @@ export default function Dashboard({ onReturnToLanding }) {
                   <div className="glass-panel p-5 rounded-2xl border border-white/10 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-mono uppercase tracking-wider text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded">Automatizada</span>
+                        <span className="text-xs font-mono uppercase tracking-wider text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded font-bold">Automatizada</span>
                         <span className="text-xs text-slate-400 font-mono">Pós-Experimental</span>
                       </div>
                       <h2 className="text-base font-bold text-white mb-2">Desafio 30 Dias Movimento</h2>
@@ -1083,10 +1179,10 @@ export default function Dashboard({ onReturnToLanding }) {
                       </p>
                     </div>
                     <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs">
-                      <span className="text-slate-400">Retenção M3: <strong className="text-white">89.2%</strong></span>
+                      <span className="text-slate-400">Retenção M3: <strong className="text-white font-mono">89.2%</strong></span>
                       <button 
                         onClick={() => showToast('Simulação de disparo em lote executada!')}
-                        className="text-emerald-400 font-semibold hover:underline cursor-pointer"
+                        className="text-emerald-400 font-bold hover:underline cursor-pointer"
                       >
                         Disparar Lote
                       </button>
@@ -1099,9 +1195,9 @@ export default function Dashboard({ onReturnToLanding }) {
 
             {/* VIEW 8: CONVERSAS (WHATSAPP HUB) */}
             {activeTab === 'conversations' && (
-              <div className="glass-panel rounded-2xl border border-white/10 h-[640px] flex overflow-hidden animate-fade-in">
-                <div className="w-80 bg-[#0c1322] border-r border-white/10 flex flex-col">
-                  <div className="p-3 border-b border-white/10 bg-[#121c2e]">
+              <div className="glass-panel rounded-2xl border border-white/10 h-[640px] flex overflow-hidden animate-fade-in shadow-2xl">
+                <div className="w-80 bg-[#090f1d] border-r border-white/10 flex flex-col">
+                  <div className="p-3 border-b border-white/10 bg-[#0f172a]">
                     <div className="relative">
                       <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" aria-hidden="true" />
                       <input
@@ -1119,7 +1215,7 @@ export default function Dashboard({ onReturnToLanding }) {
                         key={l.id}
                         onClick={() => setActiveChatLead(l)}
                         className={`p-3 transition-colors cursor-pointer flex items-center gap-3 ${
-                          activeChatLead?.id === l.id ? 'bg-slate-800/80 border-l-2 border-emerald-400' : 'hover:bg-white/5'
+                          activeChatLead?.id === l.id ? 'bg-slate-800/90 border-l-2 border-emerald-400' : 'hover:bg-white/5'
                         }`}
                       >
                         <div className="w-9 h-9 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center font-bold text-xs text-white">
@@ -1137,8 +1233,8 @@ export default function Dashboard({ onReturnToLanding }) {
                   </div>
                 </div>
 
-                <div className="flex-1 flex flex-col bg-[#080d18]">
-                  <div className="p-3 bg-[#131d2e] border-b border-white/10 flex items-center justify-between">
+                <div className="flex-1 flex flex-col bg-[#060a14]">
+                  <div className="p-3 bg-[#0f172a] border-b border-white/10 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">
                         {activeChatLead?.name[0] || 'A'}
@@ -1150,7 +1246,7 @@ export default function Dashboard({ onReturnToLanding }) {
                     </div>
                     <button
                       onClick={() => setSelectedLeadForWhatsApp(activeChatLead)}
-                      className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 text-xs font-semibold hover:bg-emerald-500/30 transition-colors"
+                      className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 text-xs font-bold hover:bg-emerald-500/30 transition-colors"
                     >
                       Abrir Modal Completo
                     </button>
@@ -1160,7 +1256,7 @@ export default function Dashboard({ onReturnToLanding }) {
                     {hubChatMessages.map((m) => (
                       <div key={m.id} className={`flex ${m.sender === 'staff' ? 'justify-end' : 'justify-start'}`}>
                         <div className={`max-w-[70%] p-3 rounded-xl text-xs ${
-                          m.sender === 'staff' ? 'bg-emerald-600 text-white rounded-br-none' : 'bg-slate-800 text-slate-200 rounded-bl-none'
+                          m.sender === 'staff' ? 'bg-emerald-600 text-white rounded-br-none shadow-md' : 'bg-slate-800 text-slate-200 rounded-bl-none'
                         }`}>
                           <p>{m.text}</p>
                           <span className="text-[9px] opacity-75 block text-right mt-1">{m.time}</span>
@@ -1169,7 +1265,7 @@ export default function Dashboard({ onReturnToLanding }) {
                     ))}
                   </div>
 
-                  <div className="p-3 bg-[#131d2e] border-t border-white/10 flex items-center gap-2">
+                  <div className="p-3 bg-[#0f172a] border-t border-white/10 flex items-center gap-2">
                     <input
                       type="text"
                       placeholder="Digite sua mensagem de demonstração..."
@@ -1185,6 +1281,7 @@ export default function Dashboard({ onReturnToLanding }) {
                             time: 'Agora'
                           }]);
                           setHubInputMessage('');
+                          playChime();
                         }
                       }}
                       className="flex-1 bg-slate-900 border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-400"
@@ -1199,12 +1296,13 @@ export default function Dashboard({ onReturnToLanding }) {
                             time: 'Agora'
                           }]);
                           setHubInputMessage('');
+                          playChime();
                         }
                       }}
                       aria-label="Enviar mensagem"
-                      className="p-2 rounded-xl bg-emerald-500 text-slate-950 hover:bg-emerald-400 transition-colors cursor-pointer"
+                      className="p-2 rounded-xl btn-emerald transition-colors cursor-pointer"
                     >
-                      <Send className="w-4 h-4" />
+                      <Send className="w-4 h-4 text-slate-950" />
                     </button>
                   </div>
                 </div>
@@ -1222,7 +1320,7 @@ export default function Dashboard({ onReturnToLanding }) {
                       <p className="text-xs text-slate-400">Indicadores detalhados para tomada de decisão da Academia Movimento</p>
                     </div>
                     <button
-                      onClick={() => showToast('Relatório fictício exportado com sucesso!')}
+                      onClick={() => showToast('Relatório executivo exportado com sucesso!')}
                       aria-label="Exportar relatório consolidado"
                       className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-white/10 flex items-center gap-1.5 transition-colors cursor-pointer"
                     >
@@ -1271,7 +1369,7 @@ export default function Dashboard({ onReturnToLanding }) {
                       <h2 className="text-base font-bold text-white">Régua de Automações & Relacionamento</h2>
                       <p className="text-xs text-slate-400">Gatilhos programados que respeitam consentimento, regras do WhatsApp e LGPD</p>
                     </div>
-                    <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                    <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 font-bold">
                       5 Réguas Configuradas
                     </span>
                   </div>
