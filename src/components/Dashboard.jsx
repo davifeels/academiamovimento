@@ -250,7 +250,7 @@ export default function Dashboard({ onReturnToLanding }) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#05070c] text-slate-100 flex flex-col antialiased">
+    <div className="min-h-screen bg-[#070d18] text-slate-100 flex flex-col antialiased">
       
       {/* Toast Notification */}
       {toastMessage && (
