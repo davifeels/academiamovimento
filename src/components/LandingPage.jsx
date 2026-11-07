@@ -28,11 +28,14 @@ import {
   Sliders,
   DollarSign,
   Award,
-  ArrowUpRight
+  ArrowUpRight,
+  Play,
+  RotateCcw
 } from 'lucide-react';
 import BrandLogo from './BrandLogo';
 import { IMAGES } from '../data/images';
 import { ACADEMY_INFO, PLANS_CATALOG } from '../data/mockData';
+import confetti from 'canvas-confetti';
 
 export default function LandingPage({ onOpenDashboard }) {
   // Interactive ROI Calculator State
@@ -44,8 +47,24 @@ export default function LandingPage({ onOpenDashboard }) {
   const monthlyRevenueGain = estimatedRecoveredLeads * averageTicket;
   const annualRevenueGain = monthlyRevenueGain * 12;
 
-  // Active preview tab inside Landing Page
-  const [previewTab, setPreviewTab] = useState('pipeline');
+  // Hero Interactive Simulation State
+  const [heroStep, setHeroStep] = useState('sent'); // 'sent' | 'typing' | 'replied'
+
+  const handleTriggerHeroSimulation = () => {
+    setHeroStep('typing');
+    setTimeout(() => {
+      setHeroStep('replied');
+      confetti({
+        particleCount: 50,
+        spread: 60,
+        origin: { y: 0.7 }
+      });
+    }, 1200);
+  };
+
+  const handleResetHeroSimulation = () => {
+    setHeroStep('sent');
+  };
 
   const opportunities = [
     {
@@ -139,7 +158,7 @@ export default function LandingPage({ onOpenDashboard }) {
     {
       title: "Gestão de Interessados",
       category: "Pipeline Comercial",
-      desc: "Tabela completa com pesquisa instantânea, filtros por modalidade e alteração rápida de status.",
+      desc: "Tabela e funil Kanban completos com pesquisa instantânea, filtros por modalidade e alteração rápida de status.",
       icon: <Users className="w-6 h-6 text-emerald-400" />,
       badge: "Core CRM"
     },
@@ -181,30 +200,30 @@ export default function LandingPage({ onOpenDashboard }) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#05070c] text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-black">
+    <div className="min-h-screen bg-[#04060a] text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-black">
       
       {/* Top Professional Authority Header */}
-      <div className="bg-gradient-to-r from-[#071329] via-[#091f1a] to-[#0d1624] border-b border-white/10 py-2.5 px-4 text-xs">
-        <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-2">
-          <div className="flex items-center gap-2 text-slate-300">
+      <div className="bg-gradient-to-r from-[#061124] via-[#081a17] to-[#0a1420] border-b border-white/10 py-2.5 px-4 sm:px-8 text-xs">
+        <div className="w-[94%] max-w-[1720px] mx-auto flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-2.5 text-slate-300">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-extrabold text-[11px] border border-emerald-500/30">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
               PROPOSTA EXCLUSIVA
             </span>
-            <span className="hidden sm:inline">Solução Comercial para a <strong>Academia Movimento</strong> • Planaltina-DF</span>
+            <span className="hidden sm:inline font-medium">Solução de Inteligência Comercial para a <strong>Academia Movimento</strong> • Planaltina-DF</span>
           </div>
 
           <div className="flex items-center gap-4 text-slate-400 text-[11px] font-mono">
-            <span className="flex items-center gap-1 text-slate-300">
-              <Building2 className="w-3.5 h-3.5 text-blue-400" /> Mais de 30 anos
+            <span className="flex items-center gap-1 text-slate-300 font-semibold">
+              <Building2 className="w-3.5 h-3.5 text-blue-400" /> Mais de 30 anos em Planaltina
             </span>
-            <span className="hidden md:inline">•</span>
-            <span className="text-emerald-400 font-semibold flex items-center gap-1">
+            <span className="hidden md:inline text-slate-600">•</span>
+            <span className="text-emerald-400 font-bold flex items-center gap-1">
               <Star className="w-3.5 h-3.5 fill-emerald-400 text-emerald-400" /> 12,8 mil seguidores @ac.movimentopl
             </span>
             <button
               onClick={onOpenDashboard}
-              className="text-white hover:text-emerald-400 font-bold underline flex items-center gap-1 cursor-pointer ml-2"
+              className="text-white hover:text-emerald-400 font-extrabold underline flex items-center gap-1 cursor-pointer ml-2"
             >
               Acessar Painel <ChevronRight className="w-3 h-3" />
             </button>
@@ -212,181 +231,271 @@ export default function LandingPage({ onOpenDashboard }) {
         </div>
       </div>
 
-      {/* Modern High-End Sticky Navbar */}
-      <header className="sticky top-0 z-50 glass-panel border-b border-white/10 transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <BrandLogo size="md" />
+      {/* Floating Island Glass Header (Spans 94% of Screen) */}
+      <header className="sticky top-2 z-50 w-[94%] max-w-[1720px] mx-auto my-2 px-6 h-20 rounded-2xl glass-panel flex items-center justify-between border border-white/15 shadow-2xl transition-all duration-300">
+        <BrandLogo size="md" />
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-7 text-xs font-semibold text-slate-300 tracking-wide uppercase font-mono">
-            <a href="#oportunidades" className="hover:text-emerald-400 transition-colors">Oportunidades</a>
-            <a href="#como-funciona" className="hover:text-emerald-400 transition-colors">Como Funciona</a>
-            <a href="#calculadora" className="hover:text-emerald-400 transition-colors text-emerald-400 flex items-center gap-1">
-              <Calculator className="w-3.5 h-3.5" /> Calculadora ROI
-            </a>
-            <a href="#recursos" className="hover:text-emerald-400 transition-colors">Recursos</a>
-            <a href="#planos" className="hover:text-emerald-400 transition-colors">Planos da Unidade</a>
-            <a href="#estrutura" className="hover:text-emerald-400 transition-colors">Estrutura</a>
-          </nav>
+        {/* Desktop Navigation Links */}
+        <nav className="hidden lg:flex items-center gap-8 text-xs font-bold text-slate-300 tracking-wider uppercase font-mono">
+          <a href="#oportunidades" className="hover:text-emerald-400 transition-colors">Oportunidades</a>
+          <a href="#como-funciona" className="hover:text-emerald-400 transition-colors">Como Funciona</a>
+          <a href="#calculadora" className="hover:text-emerald-400 transition-colors text-emerald-400 flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20">
+            <Calculator className="w-3.5 h-3.5" /> Calculadora ROI
+          </a>
+          <a href="#recursos" className="hover:text-emerald-400 transition-colors">Recursos</a>
+          <a href="#planos" className="hover:text-emerald-400 transition-colors">Planos da Unidade</a>
+          <a href="#estrutura" className="hover:text-emerald-400 transition-colors">Estrutura</a>
+        </nav>
 
-          {/* CTA Button */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onOpenDashboard}
-              aria-label="Abrir demonstração do dashboard interativo"
-              className="relative inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-extrabold text-xs tracking-wider uppercase btn-emerald cursor-pointer"
-            >
-              <Activity className="w-4 h-4 text-slate-950" />
-              <span>Explorar Demonstração</span>
-            </button>
-          </div>
+        {/* Action Button */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onOpenDashboard}
+            aria-label="Abrir demonstração do dashboard interativo"
+            className="relative inline-flex items-center gap-2 px-6 py-3 rounded-xl font-black text-xs tracking-wider uppercase btn-emerald cursor-pointer shadow-lg"
+          >
+            <Activity className="w-4 h-4 text-slate-950" />
+            <span>Explorar Demonstração</span>
+          </button>
         </div>
       </header>
 
-      {/* HERO SECTION — ELITE ATHLETIC FITNESS SAAS */}
-      <section className="relative pt-12 pb-24 lg:pt-16 lg:pb-32 overflow-hidden">
-        {/* Atmospheric ambient lighting & mesh gradients */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-gradient-to-tr from-blue-700/15 via-emerald-500/15 to-amber-500/10 blur-[140px] pointer-events-none rounded-full"></div>
-        <div className="absolute top-12 right-0 w-[450px] h-[450px] bg-emerald-500/10 blur-[120px] pointer-events-none rounded-full"></div>
-        <div className="absolute bottom-10 left-0 w-[400px] h-[400px] bg-blue-600/10 blur-[120px] pointer-events-none rounded-full"></div>
+      {/* HERO SECTION — OCCUPYING 90% VIEWPORT HEIGHT & 94% VIEWPORT WIDTH */}
+      <section className="relative min-h-[88vh] lg:min-h-[90vh] w-[94%] max-w-[1720px] mx-auto flex flex-col justify-between py-6 lg:py-8 overflow-hidden">
+        
+        {/* Background Atmospheric Light Beams */}
+        <div className="absolute top-1/4 left-1/3 -translate-x-1/2 w-[1100px] h-[550px] bg-gradient-to-tr from-blue-700/20 via-emerald-500/20 to-amber-500/15 blur-[160px] pointer-events-none rounded-full"></div>
+        <div className="absolute top-10 right-0 w-[550px] h-[550px] bg-emerald-500/15 blur-[140px] pointer-events-none rounded-full"></div>
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-600/15 blur-[140px] pointer-events-none rounded-full"></div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+        {/* Main 90% Hero Grid */}
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center flex-1 my-auto">
+          
+          {/* Left Column (55% width): Typography & Value Proposition */}
+          <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
             
-            {/* Left Headline Column */}
-            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-              
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-emerald-500/30 text-xs font-semibold text-emerald-400 shadow-xl shadow-emerald-950/20">
-                <Flame className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Gestão Comercial & Recuperação Ativa • Academia Movimento</span>
-              </div>
-
-              <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-white leading-[1.1]">
-                Mais interessados <br className="hidden sm:block" />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-300">
-                  se tornando alunos.
-                </span> <br />
-                Mais alunos <br className="hidden sm:block" />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-300 to-emerald-400">
-                  permanecendo com você.
-                </span>
-              </h1>
-
-              <p className="text-base sm:text-xl text-slate-300 max-w-2xl font-normal leading-relaxed">
-                Uma plataforma inteligente para organizar contatos, recuperar oportunidades e fortalecer o relacionamento entre sua academia e seus alunos.
-              </p>
-
-              {/* CTAs Row */}
-              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                <button
-                  onClick={onOpenDashboard}
-                  className="w-full sm:w-auto px-8 py-4 rounded-xl font-extrabold text-sm uppercase tracking-wider btn-emerald flex items-center justify-center gap-2.5 cursor-pointer group shadow-2xl"
-                >
-                  <span>Explorar Demonstração</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </button>
-
-                <a
-                  href="#calculadora"
-                  className="w-full sm:w-auto px-6 py-4 rounded-xl font-bold text-xs uppercase tracking-wider text-slate-200 hover:text-white bg-slate-900/90 hover:bg-slate-800 border border-white/10 hover:border-emerald-500/40 transition-all flex items-center justify-center gap-2"
-                >
-                  <Calculator className="w-4 h-4 text-emerald-400" />
-                  <span>Calcular Retorno Financeiro</span>
-                </a>
-              </div>
-
-              {/* Verified Trust Badges */}
-              <div className="pt-8 border-t border-white/10 grid grid-cols-3 gap-4 text-left">
-                <div className="p-3 rounded-xl bg-slate-900/50 border border-white/5">
-                  <div className="text-2xl font-black text-white font-mono">+30 Anos</div>
-                  <div className="text-[11px] text-slate-400 font-medium">Tradição em Planaltina-DF</div>
-                </div>
-                <div className="p-3 rounded-xl bg-slate-900/50 border border-white/5">
-                  <div className="text-2xl font-black text-emerald-400 font-mono">+12,8k</div>
-                  <div className="text-[11px] text-slate-400 font-medium">Audiência @ac.movimentopl</div>
-                </div>
-                <div className="p-3 rounded-xl bg-slate-900/50 border border-white/5">
-                  <div className="text-2xl font-black text-cyan-400 font-mono">100% Foco</div>
-                  <div className="text-[11px] text-slate-400 font-medium">Captação & Recuperação</div>
-                </div>
-              </div>
-
+            {/* Top pill badge */}
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-slate-900/90 border border-emerald-500/30 text-xs font-bold text-emerald-400 shadow-2xl shadow-emerald-950/30 backdrop-blur-md">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              <span>POTÊNCIA COMERCIAL • ACADEMIA MOVIMENTO</span>
+              <span className="text-slate-500 font-normal">|</span>
+              <span className="text-amber-400 font-mono">+30 ANOS EM PLANALTINA-DF</span>
             </div>
 
-            {/* Right Interactive Hero Card with Real Imagery */}
-            <div className="lg:col-span-5 relative">
-              <div className="relative rounded-3xl overflow-hidden border border-white/15 shadow-2xl shadow-black bg-[#0a101d] group">
-                
-                {/* Hero Image */}
-                <img
-                  src={IMAGES.hero.url}
-                  alt={IMAGES.hero.alt}
-                  className="w-full h-[500px] object-cover transition-transform duration-700 group-hover:scale-105"
-                  loading="eager"
-                />
-                
-                {/* Dark Vignette Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#050811] via-[#050811]/40 to-transparent"></div>
+            {/* Massive Athletic Title */}
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.05]">
+              Mais interessados <br className="hidden sm:block" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-300 drop-shadow-sm">
+                se tornando alunos.
+              </span> <br />
+              Mais alunos <br className="hidden sm:block" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-300 to-emerald-400 drop-shadow-sm">
+                permanecendo com você.
+              </span>
+            </h1>
 
-                {/* Floating Metric Pill 1: Conversion Rate */}
-                <div className="absolute top-5 right-5 glass-panel px-4 py-3 rounded-2xl border border-white/20 shadow-2xl flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
-                    <TrendingUp className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="text-[10px] text-slate-400 font-mono uppercase tracking-wider">Conversão de Leads</div>
-                    <div className="text-lg font-black text-white font-mono">36.3% <span className="text-xs text-emerald-400 font-bold">+8.4%</span></div>
-                  </div>
-                </div>
+            {/* Subtitle */}
+            <p className="text-base sm:text-xl text-slate-300 max-w-3xl font-normal leading-relaxed">
+              Uma plataforma inteligente para organizar contatos, recuperar oportunidades e fortalecer o relacionamento entre sua academia e seus alunos.
+            </p>
 
-                {/* Floating Metric Pill 2: Swimming & Fitness */}
-                <div className="absolute top-5 left-5 glass-panel px-3.5 py-2 rounded-xl border border-blue-500/30 shadow-xl flex items-center gap-2">
-                  <Waves className="w-4 h-4 text-blue-400" />
-                  <span className="text-xs font-bold text-white">Natação & Musculação</span>
-                </div>
+            {/* CTAs Row */}
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+              <button
+                onClick={onOpenDashboard}
+                className="w-full sm:w-auto px-9 py-4 rounded-xl font-black text-sm uppercase tracking-wider btn-emerald flex items-center justify-center gap-3 cursor-pointer group shadow-2xl"
+              >
+                <span>Explorar Demonstração</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
+              </button>
 
-                {/* Floating Bottom Card: Interactive WhatsApp Simulator Preview */}
-                <div className="absolute bottom-5 left-5 right-5 glass-panel p-4 rounded-2xl border border-emerald-500/30 shadow-2xl">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                      <span className="text-xs font-bold text-white">Acompanhamento WhatsApp Ativo</span>
-                    </div>
-                    <span className="text-[10px] text-emerald-400 font-mono bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                      Instância Oficial
-                    </span>
-                  </div>
-                  
-                  <div className="p-2.5 rounded-xl bg-black/50 border border-white/5 text-xs text-slate-200 italic line-clamp-2 leading-relaxed">
-                    "Olá! Tudo bem? Você demonstrou interesse em conhecer nossos planos e gostaríamos de saber se ainda podemos ajudar. Nossa equipe está à disposição para tirar suas dúvidas!"
-                  </div>
+              <a
+                href="#oportunidades"
+                className="w-full sm:w-auto px-7 py-4 rounded-xl font-bold text-xs uppercase tracking-wider text-slate-200 hover:text-white bg-slate-900/90 hover:bg-slate-800 border border-white/15 hover:border-emerald-500/40 transition-all flex items-center justify-center gap-2"
+              >
+                <span>Conhecer a Plataforma</span>
+              </a>
 
-                  <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-white/10">
-                    <span className="flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Resposta em 14 minutos
-                    </span>
-                    <button
-                      onClick={onOpenDashboard}
-                      className="text-emerald-400 font-bold hover:underline flex items-center gap-1 cursor-pointer text-xs"
-                    >
-                      Testar Envio <ArrowUpRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
+              <a
+                href="#calculadora"
+                className="w-full sm:w-auto px-6 py-4 rounded-xl font-bold text-xs uppercase tracking-wider text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-all flex items-center justify-center gap-2"
+              >
+                <Calculator className="w-4 h-4" />
+                <span>Simular Retorno (ROI)</span>
+              </a>
+            </div>
 
+            {/* Live KPI HUD Bar inside Hero */}
+            <div className="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 text-left">
+              <div className="p-3.5 rounded-2xl glass-card border border-white/10">
+                <div className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Conversão de Leads</div>
+                <div className="text-2xl font-black text-white font-mono mt-0.5">36.3%</div>
+                <div className="text-[10px] text-emerald-400 font-bold mt-1">+8.4% vs média</div>
+              </div>
+
+              <div className="p-3.5 rounded-2xl glass-card border border-blue-500/30 bg-blue-500/5">
+                <div className="text-[10px] font-mono font-bold text-blue-300 uppercase tracking-wider">Resposta WhatsApp</div>
+                <div className="text-2xl font-black text-blue-400 font-mono mt-0.5">14 min</div>
+                <div className="text-[10px] text-slate-400 mt-1">Automação imediata</div>
+              </div>
+
+              <div className="p-3.5 rounded-2xl glass-card border border-white/10">
+                <div className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Instagram Ativo</div>
+                <div className="text-2xl font-black text-white font-mono mt-0.5">12.8k</div>
+                <div className="text-[10px] text-emerald-400 font-bold mt-1">@ac.movimentopl</div>
+              </div>
+
+              <div className="p-3.5 rounded-2xl glass-card border border-emerald-500/40 bg-emerald-500/5">
+                <div className="text-[10px] font-mono font-bold text-emerald-300 uppercase tracking-wider">Receita Resgatada</div>
+                <div className="text-2xl font-black text-emerald-400 font-mono mt-0.5">R$ 48.720</div>
+                <div className="text-[10px] text-slate-400 mt-1">Projeção anual demo</div>
               </div>
             </div>
 
           </div>
+
+          {/* Right Column (45% width): High-Definition Live Interactive Cockpit */}
+          <div className="lg:col-span-5 relative h-full flex items-center justify-center">
+            <div className="w-full h-[520px] lg:h-[580px] xl:h-[620px] rounded-3xl overflow-hidden border border-white/15 shadow-2xl shadow-black bg-[#080e1a] relative flex flex-col justify-between p-6 group">
+              
+              {/* Background Fitness Visual */}
+              <img
+                src={IMAGES.hero.url}
+                alt={IMAGES.hero.alt}
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-40 mix-blend-luminosity"
+                loading="eager"
+              />
+              
+              {/* Vignette Gradients */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#060a12] via-[#081020]/80 to-[#0a1426]/90"></div>
+
+              {/* Cockpit Top Bar */}
+              <div className="relative z-10 flex items-center justify-between pb-4 border-b border-white/10">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span className="text-xs font-black text-white uppercase font-mono tracking-wider">
+                    SIMULADOR AO VIVO • INSTÂNCIA WHATSAPP
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono bg-emerald-500/10 text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-500/25 font-bold">
+                  AM-PLANALTINA
+                </span>
+              </div>
+
+              {/* Middle Interactive Simulation Stage */}
+              <div className="relative z-10 space-y-4 my-auto">
+                
+                {/* Simulated Lead Inbound Message */}
+                <div className="flex justify-start">
+                  <div className="max-w-[85%] bg-slate-900/90 text-slate-200 border border-white/10 rounded-2xl rounded-bl-none p-3.5 text-xs shadow-lg space-y-1">
+                    <div className="text-[10px] text-emerald-400 font-mono font-bold flex items-center gap-1">
+                      <span>Mariana Albuquerque</span>
+                      <span className="text-slate-500">•</span>
+                      <span className="text-slate-400">Instagram @ac.movimentopl</span>
+                    </div>
+                    <p className="leading-relaxed">
+                      "Olá! Vi no Instagram que vocês têm natação e musculação. Gostaria de saber os horários da piscina aquecida e os planos!"
+                    </p>
+                    <span className="text-[9px] text-slate-500 block text-right">Ontem 14:15</span>
+                  </div>
+                </div>
+
+                {/* Simulated Automated Recovery Outbound Message */}
+                <div className="flex justify-end">
+                  <div className="max-w-[90%] bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl rounded-br-none p-3.5 text-xs shadow-xl space-y-1">
+                    <div className="text-[10px] text-emerald-200 font-mono font-bold flex items-center gap-1">
+                      <Zap className="w-3 h-3" />
+                      <span>RÉGUA MOVIMENTO GROWTH (D+1)</span>
+                    </div>
+                    <p className="leading-relaxed font-medium">
+                      "Olá! Tudo bem? Você demonstrou interesse em conhecer nossos planos e gostaríamos de saber se ainda podemos ajudar. Nossa equipe está à disposição para tirar suas dúvidas!"
+                    </p>
+                    <span className="text-[9px] text-emerald-200/80 block text-right font-mono">Hoje 10:30 ✓✓</span>
+                  </div>
+                </div>
+
+                {/* Dynamic Replied State */}
+                {heroStep === 'typing' && (
+                  <div className="flex justify-start">
+                    <div className="bg-slate-900/90 border border-white/10 rounded-2xl px-4 py-2 text-xs text-slate-400 rounded-bl-none flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce"></span>
+                      <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                      <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+                      <span className="text-[11px]">Mariana está digitando...</span>
+                    </div>
+                  </div>
+                )}
+
+                {heroStep === 'replied' && (
+                  <div className="flex justify-start animate-fade-in">
+                    <div className="max-w-[85%] bg-emerald-950/80 text-emerald-200 border border-emerald-500/40 rounded-2xl rounded-bl-none p-3.5 text-xs shadow-2xl space-y-1">
+                      <div className="text-[10px] text-emerald-400 font-mono font-bold flex items-center gap-1">
+                        <span>Mariana Albuquerque</span>
+                        <span className="text-slate-500">•</span>
+                        <span className="text-emerald-300 font-bold">Interesse Confirmado!</span>
+                      </div>
+                      <p className="leading-relaxed">
+                        "Oi! Desculpe a demora, tenho muito interesse sim! Como faço para agendar minha aula experimental gratuita na piscina amanhã às 19h?"
+                      </p>
+                      <span className="text-[9px] text-emerald-400/80 block text-right font-mono font-bold">Hoje 10:31 • Convertido</span>
+                    </div>
+                  </div>
+                )}
+
+              </div>
+
+              {/* Cockpit Interactive Action Footer */}
+              <div className="relative z-10 pt-4 border-t border-white/10 flex items-center justify-between gap-3">
+                {heroStep === 'sent' && (
+                  <button
+                    onClick={handleTriggerHeroSimulation}
+                    className="w-full py-3 rounded-xl btn-emerald font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-lg"
+                  >
+                    <Play className="w-4 h-4 text-slate-950 fill-slate-950" />
+                    <span>Testar Resposta da Aluna ao Vivo</span>
+                  </button>
+                )}
+
+                {heroStep === 'typing' && (
+                  <div className="w-full py-3 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs flex items-center justify-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-spin"></span>
+                    <span>Simulando digitação no WhatsApp...</span>
+                  </div>
+                )}
+
+                {heroStep === 'replied' && (
+                  <div className="w-full flex items-center gap-2">
+                    <button
+                      onClick={onOpenDashboard}
+                      className="flex-1 py-3 rounded-xl btn-emerald font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-lg"
+                    >
+                      <CheckCircle2 className="w-4 h-4 text-slate-950" />
+                      <span>Ver Lead no Painel</span>
+                    </button>
+                    <button
+                      onClick={handleResetHeroSimulation}
+                      className="p-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                      title="Reiniciar Simulação"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+            </div>
+          </div>
+
         </div>
+
       </section>
 
       {/* SECTION: INTERACTIVE ROI & REVENUE CALCULATOR */}
-      <section id="calculadora" className="py-20 bg-gradient-to-b from-[#060a12] via-[#091222] to-[#060a12] border-y border-white/10 relative">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="calculadora" className="py-20 bg-gradient-to-b from-[#05070c] via-[#081120] to-[#05070c] border-y border-white/10 relative">
+        <div className="w-[94%] max-w-[1720px] mx-auto px-4">
           
           <div className="text-center max-w-3xl mx-auto mb-14 space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-400 uppercase font-mono tracking-wider">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-400 uppercase font-mono tracking-wider">
               <Calculator className="w-3.5 h-3.5" /> Impacto Comercial Estimado
             </div>
             <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
@@ -508,7 +617,7 @@ export default function LandingPage({ onOpenDashboard }) {
 
       {/* SECTION: OPORTUNIDADES QUE NÃO PODEM SER PERDIDAS */}
       <section id="oportunidades" className="py-20 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-[94%] max-w-[1720px] mx-auto px-4">
           
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-bold text-blue-400 uppercase font-mono tracking-wider">
@@ -600,7 +709,7 @@ export default function LandingPage({ onOpenDashboard }) {
 
       {/* SECTION: COMO FUNCIONA (4 ETAPAS) */}
       <section id="como-funciona" className="py-20 bg-[#070b14] border-y border-white/10 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-[94%] max-w-[1720px] mx-auto px-4">
           
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-400 uppercase font-mono tracking-wider">
@@ -651,7 +760,7 @@ export default function LandingPage({ onOpenDashboard }) {
 
       {/* SECTION: RECURSOS DA PLATAFORMA */}
       <section id="recursos" className="py-20 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-[94%] max-w-[1720px] mx-auto px-4">
           
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-bold text-blue-400 uppercase font-mono tracking-wider">
@@ -704,7 +813,7 @@ export default function LandingPage({ onOpenDashboard }) {
 
       {/* SECTION: PLANOS DA ACADEMIA MOVIMENTO */}
       <section id="planos" className="py-20 bg-[#070b14] border-y border-white/10 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-[94%] max-w-[1720px] mx-auto px-4">
           
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-400 uppercase font-mono tracking-wider">
@@ -764,7 +873,7 @@ export default function LandingPage({ onOpenDashboard }) {
 
       {/* SECTION: ESTRUTURA PROFISSIONAL REALISTA */}
       <section id="estrutura" className="py-20 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-[94%] max-w-[1720px] mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             
             <div className="lg:col-span-5 space-y-6">
@@ -826,13 +935,13 @@ export default function LandingPage({ onOpenDashboard }) {
 
       {/* SECTION: DEMONSTRAÇÃO DO PAINEL (CTA FINAL) */}
       <section className="py-24 relative overflow-hidden">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+        <div className="w-[94%] max-w-[1720px] mx-auto px-4 relative z-10 text-center">
           
           <div className="glass-panel p-10 sm:p-16 rounded-3xl border border-emerald-500/40 bg-gradient-to-b from-[#0c1830] via-[#09101d] to-[#05070c] shadow-2xl shadow-black relative overflow-hidden">
             
             <div className="absolute top-0 right-1/4 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none"></div>
 
-            <div className="max-w-3xl mx-auto space-y-6">
+            <div className="max-w-4xl mx-auto space-y-6">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-extrabold text-xs tracking-wider uppercase font-mono">
                 <Sparkles className="w-4 h-4 text-emerald-400" />
                 <span>EXPERIMENTE A PLATAFORMA AO VIVO</span>
@@ -846,7 +955,7 @@ export default function LandingPage({ onOpenDashboard }) {
               </h2>
 
               <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
-                Explore a tabela dinâmica de interessados, simule mensagens oficiais de WhatsApp, acompanhe aulas experimentais e veja métricas comerciais com dados fictícios prontos para demonstração.
+                Explore a tabela dinâmica e o funil Kanban de interessados, simule mensagens oficiais de WhatsApp, acompanhe aulas experimentais e veja métricas comerciais com dados fictícios prontos para demonstração.
               </p>
 
               <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -865,7 +974,10 @@ export default function LandingPage({ onOpenDashboard }) {
                   <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Navegação 100% Funcional
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Simulador de Conversas
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Funil Kanban + Tabela
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Simulador de Conversas WhatsApp
                 </span>
                 <span className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Gráficos Interativos
@@ -879,8 +991,8 @@ export default function LandingPage({ onOpenDashboard }) {
       </section>
 
       {/* FOOTER */}
-      <footer className="mt-auto bg-[#04060a] border-t border-white/5 py-12 text-slate-400 text-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <footer className="mt-auto bg-[#030508] border-t border-white/5 py-12 text-slate-400 text-sm">
+        <div className="w-[94%] max-w-[1720px] mx-auto px-4 space-y-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <BrandLogo size="md" />
 
