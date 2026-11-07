@@ -203,9 +203,9 @@ export default function LandingPage({ onOpenDashboard }) {
   return (
     <div className="min-h-screen bg-[#070d18] text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-black">
       
-      {/* 100% Full-Bleed Sleek Top Ribbon */}
-      <div className="w-full bg-[#050a14] border-b border-white/[0.08] py-2 px-4 sm:px-8 text-xs font-mono">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 text-[11px]">
+      {/* 100% Full-Bleed Sleek Top Ribbon (90% Width) */}
+      <div className="w-full bg-[#050a14] border-b border-white/[0.08] py-2 px-3 sm:px-6 text-xs font-mono">
+        <div className="w-[90%] max-w-[1750px] mx-auto flex items-center justify-between gap-3 text-[11px]">
           <div className="flex items-center gap-2 truncate">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-extrabold text-[10px] border border-emerald-500/30 whitespace-nowrap">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -216,7 +216,7 @@ export default function LandingPage({ onOpenDashboard }) {
             </span>
           </div>
 
-          <div className="flex items-center gap-3 sm:gap-5 text-slate-400 whitespace-nowrap text-[11px] flex-shrink-0">
+          <div className="flex items-center gap-3 sm:gap-6 text-slate-400 whitespace-nowrap text-[11px] flex-shrink-0">
             <span className="hidden md:inline-flex items-center gap-1.5 text-slate-300 font-semibold">
               <Building2 className="w-3.5 h-3.5 text-blue-400" /> +30 anos em Planaltina
             </span>
@@ -234,13 +234,13 @@ export default function LandingPage({ onOpenDashboard }) {
         </div>
       </div>
 
-      {/* 100% Full-Bleed Modern Sticky Navbar with Generous Breathing Room */}
+      {/* 100% Full-Bleed Modern Sticky Navbar (90% Width Spanning Across Screen) */}
       <header className="sticky top-0 z-50 w-full bg-[#070d18]/95 backdrop-blur-xl border-b border-white/[0.08] transition-all duration-300 shadow-2xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 sm:h-22 flex items-center justify-between gap-4 lg:gap-6">
+        <div className="w-[90%] max-w-[1750px] mx-auto px-2 sm:px-4 lg:px-6 h-20 sm:h-22 flex items-center justify-between gap-4 lg:gap-8">
           <BrandLogo size="md" className="flex-shrink-0" />
 
           {/* Desktop Navigation Links (with whitespace-nowrap to guarantee NO ugly 2-line wraps) */}
-          <nav className="hidden lg:flex items-center gap-4 xl:gap-7 text-xs xl:text-sm font-bold text-slate-300 tracking-wider uppercase font-mono">
+          <nav className="hidden lg:flex items-center gap-5 xl:gap-8 text-xs xl:text-sm font-bold text-slate-300 tracking-wider uppercase font-mono">
             <a href="#oportunidades" className="whitespace-nowrap hover:text-emerald-400 transition-colors py-1">
               Oportunidades
             </a>
@@ -289,7 +289,7 @@ export default function LandingPage({ onOpenDashboard }) {
         </div>
       </header>
 
-      {/* 100% FULL-BLEED HERO SECTION — ~90% VIEWPORT COVERAGE WITH LUXURIOUS TOP BREATHING ROOM */}
+      {/* 100% FULL-BLEED HERO SECTION — 90% SCREEN COVERAGE WITH WIDE HORIZONTAL BREATHING ROOM */}
       <section className="relative w-full min-h-[88vh] lg:min-h-[92vh] flex items-center overflow-hidden pt-12 sm:pt-16 lg:pt-20 pb-16 sm:pb-20 lg:pb-24">
         
         {/* Full-Bleed High-Resolution Fitness Imagery covering 100% of the screen */}
@@ -307,12 +307,12 @@ export default function LandingPage({ onOpenDashboard }) {
           <div className="absolute bottom-1/4 left-1/4 w-[600px] h-[600px] bg-blue-600/10 blur-[150px] pointer-events-none rounded-full"></div>
         </div>
 
-        {/* Content Container (Standard 7xl, Perfectly Centered with generous vertical breathing room) */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+        {/* Content Container (90% OF SCREEN WIDTH, WIDE HORIZONTAL SPREAD) */}
+        <div className="relative z-10 w-[90%] max-w-[1750px] mx-auto px-2 sm:px-4 lg:px-6 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 xl:gap-20 items-center">
             
             {/* Left Column (7 cols): Typography, Hierarchy & Value Proposition */}
-            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+            <div className="lg:col-span-7 xl:col-span-7 space-y-6 text-center lg:text-left">
               
               {/* Pill badge */}
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/80 border border-emerald-500/30 text-xs font-bold text-emerald-400 backdrop-blur-md shadow-lg">
@@ -321,7 +321,7 @@ export default function LandingPage({ onOpenDashboard }) {
               </div>
 
               {/* Title with clean, strong athletic typography and balanced line-height */}
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-black tracking-tight text-white leading-[1.12]">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-black tracking-tight text-white leading-[1.12]">
                 Mais interessados <br className="hidden sm:inline" />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-300">
                   se tornando alunos.
@@ -365,37 +365,37 @@ export default function LandingPage({ onOpenDashboard }) {
               </div>
 
               {/* KPI Strip integrated below CTAs */}
-              <div className="pt-6 border-t border-white/10 grid grid-cols-2 sm:grid-cols-4 gap-3 text-left">
-                <div className="p-3 rounded-xl glass-card border border-white/10">
+              <div className="pt-6 border-t border-white/10 grid grid-cols-2 sm:grid-cols-4 gap-3.5 text-left">
+                <div className="p-3.5 rounded-xl glass-card border border-white/10">
                   <div className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Conversão Leads</div>
-                  <div className="text-xl font-black text-white font-mono mt-0.5">36.3%</div>
+                  <div className="text-xl sm:text-2xl font-black text-white font-mono mt-0.5">36.3%</div>
                   <div className="text-[10px] text-emerald-400 font-bold mt-0.5">+8.4% vs média</div>
                 </div>
 
-                <div className="p-3 rounded-xl glass-card border border-blue-500/30 bg-blue-500/5">
+                <div className="p-3.5 rounded-xl glass-card border border-blue-500/30 bg-blue-500/5">
                   <div className="text-[10px] font-mono font-bold text-blue-300 uppercase tracking-wider">Resposta Rápida</div>
-                  <div className="text-xl font-black text-blue-400 font-mono mt-0.5">14 min</div>
+                  <div className="text-xl sm:text-2xl font-black text-blue-400 font-mono mt-0.5">14 min</div>
                   <div className="text-[10px] text-slate-400 mt-0.5">Automação ativa</div>
                 </div>
 
-                <div className="p-3 rounded-xl glass-card border border-white/10">
+                <div className="p-3.5 rounded-xl glass-card border border-white/10">
                   <div className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Instagram Ativo</div>
-                  <div className="text-xl font-black text-white font-mono mt-0.5">12.8k</div>
+                  <div className="text-xl sm:text-2xl font-black text-white font-mono mt-0.5">12.8k</div>
                   <div className="text-[10px] text-emerald-400 font-bold mt-0.5">@ac.movimentopl</div>
                 </div>
 
-                <div className="p-3 rounded-xl glass-card border border-emerald-500/40 bg-emerald-500/5">
+                <div className="p-3.5 rounded-xl glass-card border border-emerald-500/40 bg-emerald-500/5">
                   <div className="text-[10px] font-mono font-bold text-emerald-300 uppercase tracking-wider">Receita Resgatada</div>
-                  <div className="text-xl font-black text-emerald-400 font-mono mt-0.5">R$ 48.720</div>
+                  <div className="text-xl sm:text-2xl font-black text-emerald-400 font-mono mt-0.5">R$ 48.720</div>
                   <div className="text-[10px] text-slate-400 mt-0.5">Projeção anual demo</div>
                 </div>
               </div>
 
             </div>
 
-            {/* Right Column (5 cols): Live Interactive WhatsApp Cockpit */}
-            <div className="lg:col-span-5 relative">
-              <div className="glass-panel p-5 rounded-3xl border border-emerald-500/30 shadow-2xl space-y-4">
+            {/* Right Column (5 cols): Live Interactive WhatsApp Cockpit (Spanning Right at 90% boundary) */}
+            <div className="lg:col-span-5 xl:col-span-5 relative flex justify-center lg:justify-end">
+              <div className="w-full max-w-xl glass-panel p-5 sm:p-6 rounded-3xl border border-emerald-500/30 shadow-2xl space-y-4">
                 
                 {/* Cockpit Top Bar */}
                 <div className="flex items-center justify-between pb-3 border-b border-white/10">
@@ -526,7 +526,7 @@ export default function LandingPage({ onOpenDashboard }) {
 
       {/* SECTION: INTERACTIVE ROI & REVENUE CALCULATOR (100% FULL-BLEED) */}
       <section id="calculadora" className="w-full py-20 bg-gradient-to-b from-[#070d18] via-[#09152a] to-[#070d18] border-y border-white/10 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-[90%] max-w-[1750px] mx-auto px-2 sm:px-4 lg:px-6">
           
           <div className="text-center max-w-3xl mx-auto mb-14 space-y-3">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-400 uppercase font-mono tracking-wider">
@@ -651,7 +651,7 @@ export default function LandingPage({ onOpenDashboard }) {
 
       {/* SECTION: OPORTUNIDADES QUE NÃO PODEM SER PERDIDAS (100% FULL-BLEED) */}
       <section id="oportunidades" className="w-full py-20 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-[90%] max-w-[1750px] mx-auto px-2 sm:px-4 lg:px-6">
           
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-bold text-blue-400 uppercase font-mono tracking-wider">
@@ -743,7 +743,7 @@ export default function LandingPage({ onOpenDashboard }) {
 
       {/* SECTION: COMO FUNCIONA (4 ETAPAS) (100% FULL-BLEED) */}
       <section id="como-funciona" className="w-full py-20 bg-[#080f1c] border-y border-white/10 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-[90%] max-w-[1750px] mx-auto px-2 sm:px-4 lg:px-6">
           
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-400 uppercase font-mono tracking-wider">
@@ -794,7 +794,7 @@ export default function LandingPage({ onOpenDashboard }) {
 
       {/* SECTION: RECURSOS DA PLATAFORMA (100% FULL-BLEED) */}
       <section id="recursos" className="w-full py-20 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-[90%] max-w-[1750px] mx-auto px-2 sm:px-4 lg:px-6">
           
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-bold text-blue-400 uppercase font-mono tracking-wider">
@@ -847,7 +847,7 @@ export default function LandingPage({ onOpenDashboard }) {
 
       {/* SECTION: PLANOS DA ACADEMIA MOVIMENTO (100% FULL-BLEED) */}
       <section id="planos" className="w-full py-20 bg-[#080f1c] border-y border-white/10 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-[90%] max-w-[1750px] mx-auto px-2 sm:px-4 lg:px-6">
           
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-400 uppercase font-mono tracking-wider">
@@ -907,7 +907,7 @@ export default function LandingPage({ onOpenDashboard }) {
 
       {/* SECTION: ESTRUTURA PROFISSIONAL REALISTA (100% FULL-BLEED) */}
       <section id="estrutura" className="w-full py-20 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-[90%] max-w-[1750px] mx-auto px-2 sm:px-4 lg:px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             
             <div className="lg:col-span-5 space-y-6">
@@ -969,7 +969,7 @@ export default function LandingPage({ onOpenDashboard }) {
 
       {/* SECTION: DEMONSTRAÇÃO DO PAINEL (CTA FINAL) (100% FULL-BLEED) */}
       <section className="w-full py-24 relative overflow-hidden bg-gradient-to-b from-[#070d18] via-[#09162c] to-[#050912]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+        <div className="w-[90%] max-w-[1750px] mx-auto px-2 sm:px-4 lg:px-6 relative z-10 text-center">
           
           <div className="glass-panel p-10 sm:p-16 rounded-3xl border border-emerald-500/40 bg-gradient-to-b from-[#0e2140] via-[#0b172c] to-[#070d18] shadow-2xl relative overflow-hidden">
             
@@ -1026,7 +1026,7 @@ export default function LandingPage({ onOpenDashboard }) {
 
       {/* FOOTER (100% FULL-BLEED) */}
       <footer className="mt-auto w-full bg-[#050912] border-t border-white/10 py-12 text-slate-400 text-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        <div className="w-[90%] max-w-[1750px] mx-auto px-2 sm:px-4 lg:px-6 space-y-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <BrandLogo size="md" />
 
